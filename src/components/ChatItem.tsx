@@ -1,0 +1,180 @@
+import { Link } from '@tanstack/react-router'
+import { GripVertical } from 'lucide-react'
+import { useState } from 'react'
+import { CHAT_DRAG_MIME } from '../lib/chat-display-order'
+import { toChatRouteParams } from '../lib/chat-id'
+import type { ChatSession } from '../lib/types'
+import { ExportMarkdownButton } from './ExportMarkdownButton'
+import { RelativeTime } from './RelativeTime'
+import { SourceBadge } from './SourceBadge'
+
+function CopyButton({ label, text }: { label: string; text: string }) {
+  const [copied, setCopied] = useState(false)
+
+  async function handleCopy() {
+    await navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="demo-button-secondary demo-button"
+      style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', borderRadius: '0.5rem' }}
+    >
+      {copied ? 'Copied!' : label}
+    </button>
+  )
+}
+
+function ChatActions({ chat }: { chat: ChatSession }) {
+  return (
+    <div
+      className="border-t border-zinc-100 px-4 py-2.5 dark:border-zinc-800 flex items-center gap-1 flex-wrap"
+      onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => e.stopPropagation()}
+    >
+      <ExportMarkdownButton chatId={chat.id} />
+      <CopyButton label="Copy ID" text={chat.id} />
+      <CopyButton
+        label="Copy All"
+        text={`${chat.title}\n${chat.source} | ${chat.updatedAt}${chat.cwd ? ` | ${chat.cwd}` : ''}`}
+      />
+    </div>
+  )
+}
+
+export type ChatItemDragProps = {
+  isDragging: boolean
+  isDropTarget: boolean
+  onDragStart: (event: React.DragEvent<HTMLButtonElement>) => void
+  onDragEnd: () => void
+  onDragOver: (event: React.DragEvent<HTMLLIElement>) => void
+  onDrop: (event: React.DragEvent<HTMLLIElement>) => void
+}
+
+export function ChatItem({
+  chat,
+  variant = 'list',
+  drag,
+}: {
+  chat: ChatSession
+  variant?: 'list' | 'grid'
+  drag?: ChatItemDragProps
+}) {
+  const { source, sessionId } = toChatRouteParams(chat.id)
+  const cardClass =
+    'group rounded-lg border border-zinc-200 bg-white/80 shadow-sm transition hover:border-zinc-300 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/50 dark:shadow-none dark:hover:border-zinc-700 dark:hover:bg-zinc-900'
+
+  const listItemClass = [
+    drag?.isDragging ? 'opacity-50' : '',
+    drag?.isDropTarget ? 'ring-2 ring-zinc-400 ring-offset-2 ring-offset-[var(--bg-base)] dark:ring-zinc-500' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const dragHandle = drag ? (
+    <button
+      type="button"
+      draggable
+      aria-label={`Reordenar chat ${chat.title}`}
+      className="mt-0.5 inline-flex shrink-0 cursor-grab rounded-md p-1 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600 active:cursor-grabbing dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+      onDragStart={drag.onDragStart}
+      onDragEnd={drag.onDragEnd}
+      onMouseDown={(event) => event.stopPropagation()}
+      onClick={(event) => event.preventDefault()}
+    >
+      <GripVertical className="h-4 w-4" aria-hidden />
+    </button>
+  ) : null
+
+  if (variant === 'grid') {
+    return (
+      <li
+        className={`min-h-0 ${listItemClass}`}
+        onDragOver={drag?.onDragOver}
+        onDrop={drag?.onDrop}
+      >
+        <div className={`${cardClass} flex h-full flex-col`}>
+          <div className="flex items-start gap-2 px-4 pt-3">
+            {dragHandle}
+            <Link
+              to="/chat/$source/$sessionId"
+              params={{ source, sessionId }}
+              className="flex flex-1 flex-col gap-2 pb-3 no-underline data-[status=pending]:opacity-90"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <SourceBadge source={chat.source} />
+                <RelativeTime iso={chat.updatedAt} />
+              </div>
+              <p className="font-medium text-zinc-900 line-clamp-2 dark:text-zinc-100">
+                {chat.title}
+              </p>
+              {chat.cwd && (
+                <p className="text-xs text-zinc-500 truncate">{chat.cwd}</p>
+              )}
+              {chat.messageCount != null && (
+                <span className="mt-auto text-xs text-zinc-400 tabular-nums dark:text-zinc-600">
+                  {chat.messageCount} msgs
+                </span>
+              )}
+            </Link>
+          </div>
+          <ChatActions chat={chat} />
+        </div>
+      </li>
+    )
+  }
+
+  return (
+    <li
+      className={listItemClass}
+      onDragOver={drag?.onDragOver}
+      onDrop={drag?.onDrop}
+    >
+      <div className={cardClass}>
+        <div className="flex items-start gap-2 px-4 py-3">
+          {dragHandle}
+          <Link
+            to="/chat/$source/$sessionId"
+            params={{ source, sessionId }}
+            className="flex flex-1 items-start gap-4 no-underline data-[status=pending]:opacity-90"
+          >
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <SourceBadge source={chat.source} />
+                <RelativeTime iso={chat.updatedAt} />
+              </div>
+              <p className="font-medium text-zinc-900 truncate dark:text-zinc-100">
+                {chat.title}
+              </p>
+              {chat.cwd && (
+                <p className="text-xs text-zinc-500 truncate mt-0.5">{chat.cwd}</p>
+              )}
+            </div>
+            {chat.messageCount != null && (
+              <span className="text-xs text-zinc-400 tabular-nums dark:text-zinc-600">
+                {chat.messageCount} msgs
+              </span>
+            )}
+          </Link>
+        </div>
+        <ChatActions chat={chat} />
+      </div>
+    </li>
+  )
+}
+
+export function setChatDragData(event: React.DragEvent, chatId: string) {
+  event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData(CHAT_DRAG_MIME, chatId)
+  event.dataTransfer.setData('text/plain', chatId)
+}
+
+export function readChatDragData(event: React.DragEvent): string | null {
+  const custom = event.dataTransfer.getData(CHAT_DRAG_MIME)
+  if (custom) return custom
+  const plain = event.dataTransfer.getData('text/plain')
+  return plain || null
+}

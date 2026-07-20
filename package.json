@@ -1,0 +1,96 @@
+{
+  "name": "ai-chats",
+  "version": "0.1.0",
+  "description": "Local desktop/web aggregator for Cursor, Grok, Codex, OpenCode, and Claude chat sessions",
+  "license": "MIT",
+  "private": false,
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "scripts": {
+    "dev": "vite dev --port 3000",
+    "generate-routes": "tsr generate",
+    "build": "vite build",
+    "start": "vite preview --host 127.0.0.1 --port 3847",
+    "preview": "vite preview",
+    "icons:generate": "node scripts/generate-app-icon.mjs",
+    "icons:tauri": "npm run icons:generate && tauri icon public/logo512.png -o src-tauri/icons",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "desktop": "bash scripts/launch-desktop.sh",
+    "desktop:dev": "tauri dev",
+    "desktop:build": "tauri build",
+    "desktop:stop": "bash scripts/stop-desktop.sh",
+    "pake": "npm run pake:build",
+    "pake:build": "npm run icons:generate && bash scripts/pake-build.sh",
+    "pake:launch": "bash scripts/launch-desktop.sh",
+    "pake:stop": "bash scripts/stop-desktop.sh",
+    "pake:desktop": "bash scripts/install-desktop-shortcut.sh",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md,css,yml,yaml}": [
+      "prettier --write"
+    ],
+    "*.{ts,tsx}": [
+      "eslint --fix"
+    ]
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/react-devtools": "latest",
+    "@tanstack/react-router": "latest",
+    "@tanstack/react-router-devtools": "latest",
+    "@tanstack/react-router-ssr-query": "latest",
+    "@tanstack/react-start": "latest",
+    "@tanstack/router-plugin": "^1.132.0",
+    "better-sqlite3": "^12.11.1",
+    "lucide-react": "^0.545.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.1.18"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/typography": "^0.5.16",
+    "@tanstack/devtools-vite": "latest",
+    "@tanstack/router-cli": "^1.132.0",
+    "@tauri-apps/cli": "^2.11.4",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "globals": "^17.7.0",
+    "husky": "^9.1.7",
+    "jsdom": "^28.1.0",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.4",
+    "sharp": "^0.35.2",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.62.0",
+    "vite": "^8.0.0",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.9"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "lightningcss"
+    ]
+  }
+}

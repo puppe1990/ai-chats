@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { toChatRouteParams } from '../lib/chat-id'
 import type { ChatSession } from '../lib/types'
 import { ExportMarkdownButton } from './ExportMarkdownButton'
+import { LoadingSpinner } from './LoadingSpinner'
 import { RelativeTime } from './RelativeTime'
 import { SourceBadge } from './SourceBadge'
 
@@ -99,7 +100,10 @@ export function ChatItem({
 }) {
   const { source, sessionId } = toChatRouteParams(chat.id)
   const cardClass =
-    'group rounded-lg border border-zinc-200 bg-white/80 shadow-sm transition hover:border-zinc-300 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/50 dark:shadow-none dark:hover:border-zinc-700 dark:hover:bg-zinc-900'
+    'group relative rounded-lg border border-zinc-200 bg-white/80 shadow-sm transition hover:border-zinc-300 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/50 dark:shadow-none dark:hover:border-zinc-700 dark:hover:bg-zinc-900 has-[[data-status=pending]]:border-[var(--lagoon)] has-[[data-status=pending]]:ring-2 has-[[data-status=pending]]:ring-[color-mix(in_oklab,var(--lagoon)_45%,transparent)] has-[[data-status=pending]]:bg-[color-mix(in_oklab,var(--lagoon)_8%,white)] dark:has-[[data-status=pending]]:bg-[color-mix(in_oklab,var(--lagoon)_12%,#0f1a1e)]'
+
+  const linkClass =
+    'chat-item-link relative flex flex-1 no-underline outline-none data-[status=pending]:cursor-wait'
 
   const listItemClass = [
     drag?.isDragging ? 'opacity-50' : '',
@@ -146,7 +150,7 @@ export function ChatItem({
             <Link
               to="/chat/$source/$sessionId"
               params={{ source, sessionId }}
-              className="flex flex-1 flex-col gap-2 pb-3 no-underline data-[status=pending]:opacity-90"
+              className={`${linkClass} flex-col gap-2 pb-3`}
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5">
@@ -164,6 +168,10 @@ export function ChatItem({
                   {chat.messageCount} msgs
                 </span>
               )}
+              <span className="chat-item-pending-badge" aria-hidden>
+                <LoadingSpinner size="sm" />
+                <span>Abrindo…</span>
+              </span>
             </Link>
           </div>
           <ChatActions
@@ -184,7 +192,7 @@ export function ChatItem({
           <Link
             to="/chat/$source/$sessionId"
             params={{ source, sessionId }}
-            className="flex flex-1 items-start gap-4 no-underline data-[status=pending]:opacity-90"
+            className={`${linkClass} items-start gap-4`}
           >
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
@@ -204,6 +212,10 @@ export function ChatItem({
                 {chat.messageCount} msgs
               </span>
             )}
+            <span className="chat-item-pending-badge" aria-hidden>
+              <LoadingSpinner size="sm" />
+              <span>Abrindo…</span>
+            </span>
           </Link>
         </div>
         <ChatActions

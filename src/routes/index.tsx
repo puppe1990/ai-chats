@@ -15,8 +15,8 @@ export const Route = createFileRoute('/')({
     }),
   // Prefer showing the previous list while revalidating — never freeze navigation.
   staleTime: 30_000,
-  pendingMs: 150,
-  pendingMinMs: 250,
+  pendingMs: 0,
+  pendingMinMs: 280,
   pendingComponent: HomePending,
   component: Home,
 })

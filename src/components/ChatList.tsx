@@ -249,19 +249,19 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
               : 'Nenhum chat encontrado.'}
         </p>
       ) : (
-        <div className="relative">
+        <div className={`relative ${loading ? 'cursor-wait' : ''}`}>
           {loading && (
             <div className="list-loading-overlay">
               <div className="list-loading-pill" role="status" aria-live="polite">
                 <LoadingSpinner size="sm" />
-                <span className="text-xs font-medium text-[var(--sea-ink-soft)]">
+                <span className="text-xs font-semibold text-[var(--sea-ink)]">
                   Atualizando lista…
                 </span>
               </div>
             </div>
           )}
           <ul
-            className={`transition-opacity duration-200 ${loading ? 'opacity-45' : 'opacity-100'} ${
+            className={`transition-opacity duration-200 ${loading ? 'opacity-40 pointer-events-none' : 'opacity-100'} ${
               viewMode === 'grid'
                 ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3'
                 : 'space-y-2'

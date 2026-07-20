@@ -7,8 +7,9 @@ export function getRouter() {
     scrollRestoration: true,
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
-    defaultPendingMs: 150,
-    defaultPendingMinMs: 350,
+    // Show pending UI immediately so clicks feel acknowledged.
+    defaultPendingMs: 0,
+    defaultPendingMinMs: 280,
   })
 
   return router

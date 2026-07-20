@@ -16,3 +16,4 @@ AI Chats.app
 AI Chats.dmg
 src-tauri/target
 src-tauri/gen
+.worktrees/

@@ -94,7 +94,8 @@ wait_for_server() {
 ensure_built() {
   ensure_dependencies
 
-  if [ ! -f "$ROOT_DIR/dist/server/server.js" ]; then
+  # SPA static build (Vite). Legacy SSR path was dist/server/server.js.
+  if [ ! -f "$ROOT_DIR/dist/index.html" ]; then
     echo "Production build missing. Running npm run build..."
     (cd "$ROOT_DIR" && npm run build)
   fi

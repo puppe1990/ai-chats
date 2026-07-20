@@ -168,4 +168,5 @@ GitHub Actions runs on every push and PR:
 - Prettier check
 - ESLint
 - Vitest
-- Production build
+- `cargo test -p ai-chats-core` (Rust data layer)
+- Production frontend build

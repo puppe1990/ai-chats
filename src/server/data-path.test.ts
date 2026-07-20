@@ -1,8 +1,9 @@
 /**
- * Data-path smoke test for the desktop shell.
+ * Data-path smoke test for the TypeScript providers / loaders.
  *
- * Exercises the same server-only loaders the createServerFn handlers call
- * (not stubs, not reimplemented).
+ * Desktop production uses Rust `ai-chats-core` via Tauri commands; this suite
+ * keeps the Node TS parity loaders (`load-chat-list.server` /
+ * `load-chat-detail.server`) green against the shared fixtures.
  */
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'

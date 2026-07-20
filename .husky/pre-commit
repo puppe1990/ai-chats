@@ -1,1 +1,6 @@
-npx lint-staged && npm test
+#!/usr/bin/env sh
+set -e
+
+# Fast feedback on staged files, then full unit suite (same gates as CI quality).
+npx lint-staged
+npm test

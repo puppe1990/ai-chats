@@ -5,19 +5,17 @@ import { useEffect, useRef, useState } from 'react'
 import {
   CHAT_DRAG_MIME,
   mergeChatOrder,
+  readChatDragData,
   readStoredChatOrder,
   reorderChatIds,
+  setChatDragData,
   writeStoredChatOrder,
 } from '../lib/chat-display-order'
 import { CHAT_PAGE_SIZE, type ChatListResponse } from '../lib/chat-list'
 import type { ChatSource } from '../lib/types'
 import { SOURCE_LABELS } from '../lib/types'
 import { getChats } from '../server/chats'
-import {
-  ChatItem,
-  readChatDragData,
-  setChatDragData,
-} from './ChatItem'
+import { ChatItem } from './ChatItem'
 import { Pagination } from './Pagination'
 
 const ALL_SOURCES: ChatSource[] = ['cursor', 'grok', 'codex', 'opencode', 'claude']
@@ -169,7 +167,8 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
       </div>
 
       <p className="mb-4 text-xs text-zinc-500">
-        Arraste pelo ícone de alça para reordenar os chats. A ordem fica salva neste navegador.
+        Arraste pelo ícone de alça para reordenar os chats. A ordem fica salva neste
+        navegador.
       </p>
 
       <div className="mb-2">
@@ -206,17 +205,9 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
       {(hasActiveSearch || hasActiveFilter) && (
         <p className="mb-4 text-xs text-zinc-500">
           {data.totalItems} resultado{data.totalItems !== 1 ? 's' : ''}
-          {hasActiveSearch && (
-            <>
-              {' '}
-              para &ldquo;{debouncedQuery.trim()}&rdquo;
-            </>
-          )}
+          {hasActiveSearch && <> para &ldquo;{debouncedQuery.trim()}&rdquo;</>}
           {hasActiveFilter && (
-            <>
-              {' '}
-              em {filter === 'all' ? 'todos os providers' : SOURCE_LABELS[filter]}
-            </>
+            <> em {filter === 'all' ? 'todos os providers' : SOURCE_LABELS[filter]}</>
           )}
         </p>
       )}

@@ -27,10 +27,7 @@ const fixturePaths: DataPaths = {
 
 describe('desktop data path (list + detail)', () => {
   it('loadChatList aggregates non-empty sessions from real fixtures', async () => {
-    const list = await loadChatList(
-      { page: 1, source: 'all', query: '' },
-      fixturePaths,
-    )
+    const list = await loadChatList({ page: 1, source: 'all', query: '' }, fixturePaths)
 
     expect(list.totalChats).toBeGreaterThan(0)
     expect(list.items.length).toBeGreaterThan(0)

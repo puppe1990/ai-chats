@@ -6,7 +6,16 @@ import tseslint from 'typescript-eslint'
 import eslintConfigPrettier from 'eslint-config-prettier'
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', '.tanstack', 'src/routeTree.gen.ts'] },
+  {
+    ignores: [
+      'dist',
+      'node_modules',
+      '.tanstack',
+      'src/routeTree.gen.ts',
+      'src-tauri/**',
+      'src-tauri/target/**',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

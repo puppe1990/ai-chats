@@ -36,11 +36,11 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx,json,md,css,yml,yaml}": [
+    "*.{ts,tsx,js,jsx,mjs,cjs,json,md,css,yml,yaml}": [
       "prettier --write"
     ],
     "*.{ts,tsx}": [
-      "eslint --fix"
+      "eslint --fix --max-warnings=0"
     ]
   },
   "dependencies": {

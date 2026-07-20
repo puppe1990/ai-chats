@@ -3,3 +3,7 @@ node_modules
 .tanstack
 package-lock.json
 src/routeTree.gen.ts
+src-tauri
+src-tauri/target
+*.icns
+*.ico

@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { GripVertical } from 'lucide-react'
 import { useState } from 'react'
-import { CHAT_DRAG_MIME } from '../lib/chat-display-order'
 import { toChatRouteParams } from '../lib/chat-id'
 import type { ChatSession } from '../lib/types'
 import { ExportMarkdownButton } from './ExportMarkdownButton'
@@ -21,7 +20,11 @@ function CopyButton({ label, text }: { label: string; text: string }) {
     <button
       onClick={handleCopy}
       className="demo-button-secondary demo-button"
-      style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', borderRadius: '0.5rem' }}
+      style={{
+        padding: '0.35rem 0.65rem',
+        fontSize: '0.75rem',
+        borderRadius: '0.5rem',
+      }}
     >
       {copied ? 'Copied!' : label}
     </button>
@@ -69,7 +72,9 @@ export function ChatItem({
 
   const listItemClass = [
     drag?.isDragging ? 'opacity-50' : '',
-    drag?.isDropTarget ? 'ring-2 ring-zinc-400 ring-offset-2 ring-offset-[var(--bg-base)] dark:ring-zinc-500' : '',
+    drag?.isDropTarget
+      ? 'ring-2 ring-zinc-400 ring-offset-2 ring-offset-[var(--bg-base)] dark:ring-zinc-500'
+      : '',
   ]
     .filter(Boolean)
     .join(' ')
@@ -111,9 +116,7 @@ export function ChatItem({
               <p className="font-medium text-zinc-900 line-clamp-2 dark:text-zinc-100">
                 {chat.title}
               </p>
-              {chat.cwd && (
-                <p className="text-xs text-zinc-500 truncate">{chat.cwd}</p>
-              )}
+              {chat.cwd && <p className="text-xs text-zinc-500 truncate">{chat.cwd}</p>}
               {chat.messageCount != null && (
                 <span className="mt-auto text-xs text-zinc-400 tabular-nums dark:text-zinc-600">
                   {chat.messageCount} msgs
@@ -128,11 +131,7 @@ export function ChatItem({
   }
 
   return (
-    <li
-      className={listItemClass}
-      onDragOver={drag?.onDragOver}
-      onDrop={drag?.onDrop}
-    >
+    <li className={listItemClass} onDragOver={drag?.onDragOver} onDrop={drag?.onDrop}>
       <div className={cardClass}>
         <div className="flex items-start gap-2 px-4 py-3">
           {dragHandle}
@@ -164,17 +163,4 @@ export function ChatItem({
       </div>
     </li>
   )
-}
-
-export function setChatDragData(event: React.DragEvent, chatId: string) {
-  event.dataTransfer.effectAllowed = 'move'
-  event.dataTransfer.setData(CHAT_DRAG_MIME, chatId)
-  event.dataTransfer.setData('text/plain', chatId)
-}
-
-export function readChatDragData(event: React.DragEvent): string | null {
-  const custom = event.dataTransfer.getData(CHAT_DRAG_MIME)
-  if (custom) return custom
-  const plain = event.dataTransfer.getData('text/plain')
-  return plain || null
 }

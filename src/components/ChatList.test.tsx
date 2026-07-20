@@ -80,13 +80,14 @@ describe('ChatList', () => {
   beforeEach(() => {
     window.localStorage.clear()
     mockFetchChats.mockReset()
-    mockFetchChats.mockImplementation(async ({ data }: { data: Record<string, unknown> }) =>
-      buildChatListResponse(chats, {
-        page: Number(data.page ?? 1),
-        source: (data.source as 'all') ?? 'all',
-        query: String(data.query ?? ''),
-        order: Array.isArray(data.order) ? (data.order as string[]) : [],
-      }),
+    mockFetchChats.mockImplementation(
+      async ({ data }: { data: Record<string, unknown> }) =>
+        buildChatListResponse(chats, {
+          page: Number(data.page ?? 1),
+          source: (data.source as 'all') ?? 'all',
+          query: String(data.query ?? ''),
+          order: Array.isArray(data.order) ? (data.order as string[]) : [],
+        }),
     )
   })
 
@@ -94,8 +95,12 @@ describe('ChatList', () => {
     render(<ChatList initialData={initialData()} />)
 
     expect(screen.getByLabelText('Buscar chats')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Visualização em lista' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Visualização em grade' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Visualização em lista' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Visualização em grade' }),
+    ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Todos/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Grok/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Codex/ })).toBeInTheDocument()
@@ -159,10 +164,9 @@ describe('ChatList', () => {
     unmount()
     render(<ChatList initialData={initialData()} />)
 
-    expect(screen.getByRole('button', { name: 'Visualização em grade' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    )
+    expect(
+      screen.getByRole('button', { name: 'Visualização em grade' }),
+    ).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('list').className).toContain('grid')
   })
 

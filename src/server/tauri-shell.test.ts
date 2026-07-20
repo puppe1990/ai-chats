@@ -51,7 +51,9 @@ describe('Tauri desktop shell project', () => {
   })
 
   it('exposes npm scripts that invoke the Tauri CLI', () => {
-    const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf-8')) as {
+    const pkg = JSON.parse(
+      fs.readFileSync(path.join(ROOT, 'package.json'), 'utf-8'),
+    ) as {
       scripts?: Record<string, string>
       devDependencies?: Record<string, string>
     }

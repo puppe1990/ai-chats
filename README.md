@@ -1,6 +1,6 @@
 # AI Chats
 
-[![CI](https://github.com/puppe1990/db-code-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/puppe1990/db-code-harness/actions/workflows/ci.yml)
+[![CI](https://github.com/puppe1990/ai-chats/actions/workflows/ci.yml/badge.svg)](https://github.com/puppe1990/ai-chats/actions/workflows/ci.yml)
 
 A local web app that aggregates coding-agent chat sessions from **Cursor**, **Grok**, **Codex**, **OpenCode**, and **Claude Code** into a single timeline sorted by most recent activity.
 
@@ -47,19 +47,19 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 
-| Command               | Description                                      |
-| --------------------- | ------------------------------------------------ |
-| `npm run dev`         | Start web dev server on port 3000                |
-| `npm run build`       | Production build                                 |
-| `npm run start`       | Run production server on port 3847               |
-| `npm run preview`     | Preview production build                         |
-| `npm run tauri:dev`   | **Desktop (primary)** — Tauri + Vite dev         |
-| `npm run tauri:build` | Build native Tauri app bundle                    |
-| `npm run desktop`     | Launch desktop app (Tauri, or dev shell)         |
-| `npm run desktop:stop`| Stop background desktop Node server              |
-| `npm test`            | Run Vitest test suite                            |
-| `npm run test:watch`  | Run tests in watch mode                          |
-| `npm run pake`        | Legacy Pake desktop packaging (optional)         |
+| Command                | Description                              |
+| ---------------------- | ---------------------------------------- |
+| `npm run dev`          | Start web dev server on port 3000        |
+| `npm run build`        | Production build                         |
+| `npm run start`        | Run production server on port 3847       |
+| `npm run preview`      | Preview production build                 |
+| `npm run tauri:dev`    | **Desktop (primary)** — Tauri + Vite dev |
+| `npm run tauri:build`  | Build native Tauri app bundle            |
+| `npm run desktop`      | Launch desktop app (Tauri, or dev shell) |
+| `npm run desktop:stop` | Stop background desktop Node server      |
+| `npm test`             | Run Vitest test suite                    |
+| `npm run test:watch`   | Run tests in watch mode                  |
+| `npm run pake`         | Legacy Pake desktop packaging (optional) |
 
 ## Desktop app (Tauri)
 

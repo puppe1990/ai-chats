@@ -1,3 +1,4 @@
+import type { DragEvent } from 'react'
 import type { ChatSession } from './types'
 
 export const CHAT_ORDER_STORAGE_KEY = 'db-code-harness:chat-order'
@@ -79,4 +80,17 @@ export function readStoredChatOrder(): string[] {
 export function writeStoredChatOrder(order: string[]) {
   if (typeof window === 'undefined') return
   window.localStorage.setItem(CHAT_ORDER_STORAGE_KEY, JSON.stringify(order))
+}
+
+export function setChatDragData(event: DragEvent, chatId: string) {
+  event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData(CHAT_DRAG_MIME, chatId)
+  event.dataTransfer.setData('text/plain', chatId)
+}
+
+export function readChatDragData(event: DragEvent): string | null {
+  const custom = event.dataTransfer.getData(CHAT_DRAG_MIME)
+  if (custom) return custom
+  const plain = event.dataTransfer.getData('text/plain')
+  return plain || null
 }

@@ -21,12 +21,16 @@ const ROLE_LABELS: Record<ChatMessage['role'], string> = {
 
 export function MessageList({ messages }: { messages: ChatMessage[] }) {
   const [showJumpButton, setShowJumpButton] = useState(false)
+  // Reset jump button when the conversation changes (render-time state adjust).
+  const [seenMessages, setSeenMessages] = useState(messages)
+  if (messages !== seenMessages) {
+    setSeenMessages(messages)
+    setShowJumpButton(false)
+  }
 
   useEffect(() => {
     if (messages.length === 0) return
-
     scrollToBottom('instant')
-    setShowJumpButton(false)
   }, [messages])
 
   useEffect(() => {

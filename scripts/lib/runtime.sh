@@ -54,6 +54,8 @@ server_is_ai_chats() {
   [[ "$body" == *"AI Chats"* ]]
 }
 
+# Starts the local Node preview server. Used only by legacy Pake launch paths.
+# Standalone Tauri builds do not call this — they embed the SPA and Rust data layer.
 ensure_server_running() {
   if port_in_use && server_is_ai_chats; then
     echo "AI Chats server already running on port $AI_CHATS_PORT"

@@ -15,7 +15,7 @@ Built with [TanStack Start](https://tanstack.com/start), React 19, Tailwind CSS,
 - **Chat detail view** — click a session to read user/assistant messages
 - **Light & dark mode** — theme toggle in the header
 - **Read-only** — no writes to agent data; safe to run locally
-- **Desktop app** — native window via Tauri (primary) with a local Node backend
+- **Desktop app** — standalone native window via Tauri (Rust data layer; no Node at runtime)
 
 ## Supported data sources
 
@@ -29,10 +29,10 @@ Built with [TanStack Start](https://tanstack.com/start), React 19, Tailwind CSS,
 
 ## Requirements
 
-- Node.js 20+
+- Node.js 20+ (web dev, and **build tooling** for the desktop app — not required at desktop runtime)
 - macOS or Linux (paths above are Unix-style; Windows would need path overrides)
 - The coding agents installed and used at least once on the machine
-- For the desktop app: [Rust](https://rustup.rs) (for Tauri) in addition to Node
+- For the desktop app: [Rust](https://rustup.rs) (for Tauri). Recommend **≥15 GB free disk** for full Rust release builds.
 
 ## Quick start
 
@@ -54,18 +54,18 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run start`        | Run production server on port 3847       |
 | `npm run preview`      | Preview production build                 |
 | `npm run tauri:dev`    | **Desktop (primary)** — Tauri + Vite dev |
-| `npm run tauri:build`  | Build native Tauri app bundle            |
-| `npm run desktop`      | Launch desktop app (Tauri, or dev shell) |
-| `npm run desktop:stop` | Stop background desktop Node server      |
+| `npm run tauri:build`  | Build standalone native Tauri app/DMG    |
+| `npm run desktop`      | Open built Tauri `.app` (no Node server) |
+| `npm run desktop:stop` | Stop legacy background Node server       |
 | `npm test`             | Run Vitest test suite                    |
 | `npm run test:watch`   | Run tests in watch mode                  |
 | `npm run pake`         | Legacy Pake desktop packaging (optional) |
 
 ## Desktop app (Tauri)
 
-The primary desktop path is **Tauri**. The native window loads the existing TanStack Start app; chat list/detail still run through the Node data layer (`createServerFn` + local filesystem/SQLite providers).
+The primary desktop path is a **standalone Tauri** app. Chat list/detail load through **Rust** commands (`get_chats` / `get_chat_detail` in `ai-chats-core`); the webview serves a static SPA from the bundle. **Node is not required at runtime** — only as build tooling (`npm`, Vite, Tauri CLI).
 
-**Prerequisites:** Node.js 20+, Rust (`rustup`), platform deps for Tauri ([guide](https://v2.tauri.app/start/prerequisites/)).
+**Prerequisites (build):** Node.js 20+, Rust (`rustup`), platform deps for Tauri ([guide](https://v2.tauri.app/start/prerequisites/)). Plan for **≥15 GB free disk** for a full release compile.
 
 **Development (hot reload):**
 
@@ -73,34 +73,39 @@ The primary desktop path is **Tauri**. The native window loads the existing TanS
 npm run tauri:dev
 ```
 
-This starts the Vite/TanStack dev server on port 3000 and opens a Tauri webview pointed at it.
+Starts the Vite dev server and opens a Tauri webview pointed at it (Node only during development).
 
-**Production-style window:**
+**Production build:**
 
 ```bash
 npm run tauri:build
+```
+
+Artifacts (macOS):
+
+- App: `src-tauri/target/release/bundle/macos/AI Chats.app`
+- DMG: `src-tauri/target/release/bundle/dmg/`
+
+Launch the built app (opens the `.app` only — no Node preview server, no repo path required):
+
+```bash
 npm run desktop
 ```
 
-Release builds start (or reuse) the local production server on `http://127.0.0.1:3847` and open the Tauri shell. The server is stopped when the app exits if Tauri started it.
+You can also open the `.app` from Finder or copy it to `/Applications`. It runs without the repository checkout and without Node on `PATH`.
 
-**Stop a background server** (e.g. left over from scripts):
-
-```bash
-npm run desktop:stop
-```
-
-Optional env vars:
+**Optional env vars** (legacy / naming):
 
 ```env
 AI_CHATS_PORT=3847
 AI_CHATS_APP_NAME=AI Chats
-AI_CHATS_ROOT=/absolute/path/to/db-code-harness   # for packaged launches outside the repo
 ```
+
+`npm run desktop:stop` only applies if a **legacy** Node preview server was started (e.g. Pake). Standalone Tauri does not use it.
 
 ### Legacy: Pake
 
-Pake packaging remains available but is **not** the primary desktop path:
+Pake packaging remains available but is **not** the primary desktop path (and still depends on a local Node server):
 
 ```bash
 npm run pake          # build AI Chats.app via pake-cli
@@ -122,9 +127,9 @@ CLAUDE_HOME=~/.claude
 ## Architecture
 
 ```
-UI (TanStack Router / Tauri webview)
-  └── getChats / getChatDetail (server functions → loadChatList / loadChatDetail)
-        └── aggregator
+UI (TanStack Router / Tauri webview SPA)
+  └── invoke get_chats / get_chat_detail
+        └── ai-chats-core (Rust)
               ├── cursor provider
               ├── grok provider
               ├── codex provider
@@ -132,11 +137,11 @@ UI (TanStack Router / Tauri webview)
               └── claude provider
 ```
 
-- Providers normalize local files into a shared `ChatSession` type
-- `sortByUpdatedAt` merges and orders results
+- Providers normalize local agent data into a shared chat session model
+- List query supports source filters, search, pagination, and favorites
 - Message parsers load conversation history per tool on the detail page
-- Unit tests use fixtures under `src/lib/**/__fixtures__`
-- Tauri (`src-tauri/`) is the native shell; Node keeps FS/SQLite access
+- Unit tests: Vitest for UI/pure TS; Rust tests for providers under `crates/ai-chats-core`
+- Tauri (`src-tauri/`) is the native shell + command bridge; **no Node process at runtime**
 
 ## Project structure
 
@@ -144,13 +149,15 @@ UI (TanStack Router / Tauri webview)
 src/
 ├── components/     # ChatList, ChatItem, MessageList, SourceBadge
 ├── lib/
-│   ├── providers/  # Per-tool session readers
-│   ├── messages/   # Per-tool message parsers
+│   ├── desktop-api.ts  # Tauri invoke adapter
+│   ├── providers/      # TS providers (tests / web parity)
+│   ├── messages/
 │   ├── aggregator.ts
 │   └── filter-chats.ts
 ├── routes/         # / and /chat/$source/$sessionId
-└── server/         # TanStack Start server functions + loadChatList/Detail
-src-tauri/          # Tauri 2 Rust shell (window + backend lifecycle)
+└── server/         # Optional web/server helpers (desktop uses Rust)
+crates/ai-chats-core/  # Rust data layer (providers, aggregate, detail)
+src-tauri/          # Tauri 2 shell (static SPA + invoke handlers)
 scripts/            # Desktop launch / legacy Pake helpers
 ```
 

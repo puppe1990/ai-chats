@@ -28,7 +28,7 @@ describe('Tauri desktop shell project', () => {
     }
 
     expect(conf.productName).toBe('AI Chats')
-    expect(conf.build?.devUrl).toMatch(/localhost:3000/)
+    expect(conf.build?.devUrl).toMatch(/127\.0\.0\.1:3000/)
     // Production webview loads the Node backend (preserves createServerFn data path)
     expect(conf.build?.frontendDist).toMatch(/127\.0\.0\.1:3847/)
     expect(conf.build?.beforeDevCommand).toMatch(/npm run dev/)

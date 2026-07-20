@@ -28,5 +28,14 @@ export function AppReadyGate() {
     dismissStartupLoader()
   }, [bootstrapping])
 
+  // Hard safety: never keep the full-screen loader forever, even if a route
+  // stays pending (e.g. a locked SQLite file).
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      dismissStartupLoader()
+    }, 5_000)
+    return () => window.clearTimeout(timer)
+  }, [])
+
   return null
 }

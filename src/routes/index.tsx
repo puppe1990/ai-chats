@@ -13,10 +13,10 @@ export const Route = createFileRoute('/')({
         query: '',
       },
     }),
-  staleTime: 0,
-  staleReloadMode: 'blocking',
+  // Prefer showing the previous list while revalidating — never freeze navigation.
+  staleTime: 30_000,
   pendingMs: 150,
-  pendingMinMs: 400,
+  pendingMinMs: 250,
   pendingComponent: HomePending,
   component: Home,
 })

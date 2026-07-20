@@ -84,7 +84,8 @@ export const STARTUP_LOADER_DISMISS_SCRIPT = `
   if (document.body) observe()
   else document.addEventListener('DOMContentLoaded', observe)
 
-  window.setTimeout(dismissStartupLoader, 45000)
+  // Never leave an invisible click-blocker up if SSR/providers hang.
+  window.setTimeout(dismissStartupLoader, 6000)
 })()
 `.trim()
 
@@ -116,13 +117,14 @@ export const STARTUP_LOADER_CRITICAL_CSS = `
   }
   .startup-loader--hide,
   html[data-app-ready='true'] #app-startup-loader {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
     transform: scale(1.02);
   }
   html[data-app-ready='true'] #app-startup-loader {
     display: none !important;
+    pointer-events: none !important;
   }
   .startup-loader__card {
     position: relative;

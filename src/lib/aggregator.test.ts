@@ -1,6 +1,7 @@
-import { describe, it, expect, vi } from 'vitest'
-import { aggregateChats } from './aggregator'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { aggregateChats, PROVIDER_TIMEOUT_MS, safeFetch } from './aggregator'
 import type { ChatSession } from './types'
+import { fetchGrokChats } from './providers/grok'
 
 vi.mock('./providers/grok', () => ({
   fetchGrokChats: vi.fn().mockResolvedValue([
@@ -51,6 +52,10 @@ vi.mock('./providers/claude', () => ({
 }))
 
 describe('aggregateChats', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it('merges all providers and sorts by updatedAt desc', async () => {
     const result = await aggregateChats({
       cursorHome: '/c',
@@ -62,4 +67,31 @@ describe('aggregateChats', () => {
     expect(result).toHaveLength(4)
     expect(result.map((s) => s.source)).toEqual(['codex', 'claude', 'grok', 'cursor'])
   })
+
+  it('returns empty for a provider that never resolves (timeout)', async () => {
+    vi.mocked(fetchGrokChats).mockImplementation(
+      () => new Promise(() => {}), // hang forever
+    )
+
+    const result = await safeFetch('grok', () => fetchGrokChats('/x'), 40)
+    expect(result).toEqual([])
+  })
+
+  it('still returns other providers when one hangs', async () => {
+    vi.mocked(fetchGrokChats).mockImplementation(() => new Promise(() => {}))
+
+    const started = Date.now()
+    const result = await aggregateChats({
+      cursorHome: '/c',
+      grokHome: '/g',
+      codexHome: '/x',
+      opencodeDataDir: '/o',
+      claudeHome: '/cl',
+    })
+    const elapsed = Date.now() - started
+
+    expect(result.map((s) => s.source).sort()).toEqual(['claude', 'codex', 'cursor'])
+    // Should not wait for the full hang — timeout bounds total wait.
+    expect(elapsed).toBeLessThan(PROVIDER_TIMEOUT_MS + 1500)
+  }, 10_000)
 })

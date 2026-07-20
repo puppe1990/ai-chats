@@ -13,10 +13,9 @@ export const Route = createFileRoute('/chat/$source/$sessionId')({
     getChatDetail({
       data: fromChatRouteParams(params.source, params.sessionId),
     }),
-  staleTime: 0,
-  staleReloadMode: 'blocking',
+  staleTime: 30_000,
   pendingMs: 100,
-  pendingMinMs: 300,
+  pendingMinMs: 200,
   pendingComponent: ChatDetailPending,
   component: ChatDetailPage,
 })

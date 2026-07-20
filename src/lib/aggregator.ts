@@ -8,12 +8,35 @@ import { fetchCursorChats } from './providers/cursor'
 import { fetchGrokChats } from './providers/grok'
 import { fetchOpenCodeChats } from './providers/opencode'
 
-async function safeFetch(
+/** Prevent a single slow/locked agent store from freezing the whole UI. */
+export const PROVIDER_TIMEOUT_MS = 3_500
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`[aggregateChats] ${label} timed out after ${ms}ms`))
+    }, ms)
+
+    promise.then(
+      (value) => {
+        clearTimeout(timer)
+        resolve(value)
+      },
+      (err: unknown) => {
+        clearTimeout(timer)
+        reject(err)
+      },
+    )
+  })
+}
+
+export async function safeFetch(
   name: string,
   fn: () => Promise<ChatSession[]>,
+  timeoutMs: number = PROVIDER_TIMEOUT_MS,
 ): Promise<ChatSession[]> {
   try {
-    return await fn()
+    return await withTimeout(fn(), timeoutMs, name)
   } catch (err) {
     console.error(`[aggregateChats] ${name} provider failed:`, err)
     return []

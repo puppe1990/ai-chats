@@ -1,3 +1,4 @@
+pub mod messages;
 pub mod paths;
 pub mod providers;
 mod sqlite_util;

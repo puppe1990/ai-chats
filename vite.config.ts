@@ -1,14 +1,16 @@
 import { defineConfig } from 'vite'
-import { devtools } from '@tanstack/devtools-vite'
-
-import { tanstackStart } from '@tanstack/react-start/plugin/vite'
-
-import viteReact from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 
-const config = defineConfig({
+export default defineConfig({
   resolve: { tsconfigPaths: true },
-  plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact()],
+  plugins: [
+    tanstackRouter({ target: 'react', autoCodeSplitting: true }),
+    tailwindcss(),
+    react(),
+  ],
+  clearScreen: false,
+  server: { host: '127.0.0.1', port: 3000, strictPort: true },
+  build: { outDir: 'dist', emptyOutDir: true },
 })
-
-export default config

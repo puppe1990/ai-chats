@@ -2,11 +2,11 @@
 
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { getChatDetail } from '../lib/desktop-api'
 import type { ChatDetail } from '../lib/types'
-import { getChatDetail } from '../server/chat-detail'
 import { ExportMarkdownButton } from './ExportMarkdownButton'
 
-vi.mock('../server/chat-detail', () => ({
+vi.mock('../lib/desktop-api', () => ({
   getChatDetail: vi.fn(),
 }))
 

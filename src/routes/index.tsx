@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { getChats } from '../server/chats'
+import { getChats } from '../lib/desktop-api'
 import { ChatList } from '../components/ChatList'
 import { ChatListSkeleton } from '../components/ChatListSkeleton'
 import { PageLoadingState } from '../components/PageLoadingState'

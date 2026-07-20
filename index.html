@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Chats</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script>
+      ;(function () {
+        try {
+          var stored = window.localStorage.getItem('theme')
+          var mode = stored === 'dark' ? 'dark' : 'light'
+          var root = document.documentElement
+          root.classList.remove('light', 'dark')
+          root.classList.add(mode)
+          root.setAttribute('data-theme', mode)
+          root.style.colorScheme = mode
+        } catch (e) {}
+      })()
+    </script>
+  </head>
+  <body
+    class="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]"
+  >
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

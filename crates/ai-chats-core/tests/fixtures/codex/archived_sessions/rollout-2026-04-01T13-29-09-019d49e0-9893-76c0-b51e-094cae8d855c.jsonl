@@ -1,0 +1,3 @@
+{"timestamp":"2026-04-01T13:29:09.000Z","type":"session_meta","payload":{"id":"019d49e0-9893-76c0-b51e-094cae8d855c","timestamp":"2026-04-01T13:29:09.000Z","cwd":"/test/only-on-disk"}}
+{"timestamp":"2026-04-01T13:29:10.000Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"Sessão só no disco do Codex"}]}}
+{"timestamp":"2026-04-01T13:29:15.000Z","type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Entendido, vou ajudar."}]}}

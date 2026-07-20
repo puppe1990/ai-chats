@@ -25,11 +25,21 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            .
+            crates/ai-chats-core
+
       # better-sqlite3 native addon
       - name: Install build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential python3
+          sudo apt-get install -y build-essential python3 libsqlite3-dev
 
       - name: Install dependencies
         run: npm ci
@@ -40,8 +50,11 @@ jobs:
       - name: ESLint
         run: npm run lint
 
-      - name: Tests
+      - name: Tests (Vitest)
         run: npm test
+
+      - name: Tests (Rust ai-chats-core)
+        run: cargo test -p ai-chats-core
 
       - name: Build
         run: npm run build

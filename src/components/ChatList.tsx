@@ -1,5 +1,3 @@
-'use client'
-import { useServerFn } from '@tanstack/react-start'
 import { LayoutGrid, List } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -18,9 +16,9 @@ import {
   writeStoredFavorites,
 } from '../lib/chat-favorites'
 import { CHAT_PAGE_SIZE, type ChatListResponse } from '../lib/chat-list'
+import { getChats } from '../lib/desktop-api'
 import type { ChatSource } from '../lib/types'
 import { SOURCE_LABELS } from '../lib/types'
-import { getChats } from '../server/chats'
 import { ChatItem } from './ChatItem'
 import { LoadingSpinner } from './LoadingSpinner'
 import { Pagination } from './Pagination'
@@ -69,7 +67,6 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
   const skipInitialFetch = useRef(true)
   const fetchGeneration = useRef(0)
   const favoriteIdsRef = useRef(favoriteIds)
-  const fetchChats = useServerFn(getChats)
 
   useEffect(() => {
     favoriteIdsRef.current = favoriteIds
@@ -85,7 +82,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
   }, [query])
 
   /**
-   * Server refetch for pagination/filters/order.
+   * Desktop API refetch for pagination/filters/order.
    * favoriteIds is read from a ref so starring a chat stays local + instant
    * (a full aggregate refetch freezes the UI for seconds).
    */
@@ -98,7 +95,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
     const generation = ++fetchGeneration.current
     setLoading(true)
 
-    fetchChats({
+    getChats({
       data: {
         page,
         pageSize: CHAT_PAGE_SIZE,
@@ -121,7 +118,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
           setLoading(false)
         }
       })
-  }, [page, filter, debouncedQuery, chatOrder, favoritesOnly, fetchChats])
+  }, [page, filter, debouncedQuery, chatOrder, favoritesOnly])
 
   const hasActiveSearch = debouncedQuery.trim().length > 0
   const hasActiveFilter = filter !== 'all' || favoritesOnly

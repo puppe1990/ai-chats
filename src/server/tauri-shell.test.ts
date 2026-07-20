@@ -29,25 +29,25 @@ describe('Tauri desktop shell project', () => {
 
     expect(conf.productName).toBe('AI Chats')
     expect(conf.build?.devUrl).toMatch(/127\.0\.0\.1:3000/)
-    // Production webview loads the Node backend (preserves createServerFn data path)
-    expect(conf.build?.frontendDist).toMatch(/127\.0\.0\.1:3847/)
+    // Production webview loads built SPA assets (Rust serves data via invoke)
+    expect(conf.build?.frontendDist).toBeTruthy()
+    expect(conf.build?.frontendDist).not.toMatch(/^https?:\/\//)
     expect(conf.build?.beforeDevCommand).toMatch(/npm run dev/)
 
     const cargo = fs.readFileSync(cargoPath, 'utf-8')
     expect(cargo).toMatch(/tauri\s*=/)
     expect(cargo).toMatch(/name\s*=\s*"ai-chats"/)
+    expect(cargo).toMatch(/ai-chats-core/)
 
     const lib = fs.readFileSync(libPath, 'utf-8')
-    expect(lib).toMatch(/start_backend|tauri::Builder/)
-    // Cold-start fix: webview must be created after backend is ready
-    expect(conf.app?.windows?.[0]?.create).toBe(false)
-    expect(lib).toMatch(/WebviewWindowBuilder::from_config/)
-    expect(lib).toMatch(/create_main_window/)
-    // setup() must call start_backend before create_main_window
-    const callBackend = lib.indexOf('backend::start_backend')
-    const callCreate = lib.indexOf('create_main_window(app)')
-    expect(callBackend).toBeGreaterThan(-1)
-    expect(callCreate).toBeGreaterThan(callBackend)
+    expect(lib).toMatch(/tauri::Builder/)
+    expect(lib).toMatch(/get_chats/)
+    expect(lib).toMatch(/get_chat_detail/)
+    expect(lib).toMatch(/invoke_handler/)
+    // Window is created by Tauri from config; no Node backend spawn
+    expect(conf.app?.windows?.[0]?.create).toBe(true)
+    expect(lib).not.toMatch(/start_backend/)
+    expect(lib).not.toMatch(/WebviewWindowBuilder::from_config/)
   })
 
   it('exposes npm scripts that invoke the Tauri CLI', () => {

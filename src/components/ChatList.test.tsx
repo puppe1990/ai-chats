@@ -26,12 +26,8 @@ vi.mock('@tanstack/react-router', () => ({
   ),
 }))
 
-vi.mock('../server/chats', () => ({
-  getChats: { id: 'getChats' },
-}))
-
-vi.mock('@tanstack/react-start', () => ({
-  useServerFn: () => mockFetchChats,
+vi.mock('../lib/desktop-api', () => ({
+  getChats: (...args: unknown[]) => mockFetchChats(...args),
 }))
 
 vi.mock('./RelativeTime', () => ({

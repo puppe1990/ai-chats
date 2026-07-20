@@ -1,6 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { fromChatRouteParams } from '../lib/chat-id'
-import { getChatDetail } from '../server/chat-detail'
+import { getChatDetail } from '../lib/desktop-api'
 import { ChatDetailSkeleton } from '../components/ChatDetailSkeleton'
 import { ExportMarkdownButton } from '../components/ExportMarkdownButton'
 import { FormattedDate } from '../components/FormattedDate'

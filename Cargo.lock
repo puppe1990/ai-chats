@@ -33,6 +33,7 @@ dependencies = [
 name = "ai-chats"
 version = "0.1.0"
 dependencies = [
+ "ai-chats-core",
  "log",
  "serde",
  "serde_json",

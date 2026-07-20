@@ -1,16 +1,15 @@
 /**
- * Data-path smoke test for the Tauri desktop shell.
+ * Data-path smoke test for the desktop shell.
  *
- * The UI calls createServerFn handlers which delegate to loadChatList /
- * loadChatDetail. Those are the same shipped functions exercised here against
- * real provider fixtures (not stubs, not reimplemented).
+ * Exercises the same server-only loaders the createServerFn handlers call
+ * (not stubs, not reimplemented).
  */
 import path from 'node:path'
-import { describe, expect, it } from 'vitest'
 import { fileURLToPath } from 'node:url'
+import { describe, expect, it } from 'vitest'
 import type { DataPaths } from '../lib/config'
-import { loadChatDetail } from './chat-detail'
-import { loadChatList } from './chats'
+import { loadChatDetail } from './load-chat-detail.server'
+import { loadChatList } from './load-chat-list.server'
 
 const FIXTURES = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -34,7 +33,6 @@ describe('desktop data path (list + detail)', () => {
     expect(list.totalItems).toBe(list.totalChats)
 
     const sources = new Set(list.items.map((c) => c.source))
-    // Fixtures cover at least these product sources
     expect(sources.has('grok') || list.counts.grok > 0).toBe(true)
     expect(list.counts.claude).toBeGreaterThan(0)
     expect(list.counts.codex).toBeGreaterThan(0)

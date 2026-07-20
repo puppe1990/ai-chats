@@ -1,5 +1,6 @@
 'use client'
 
+import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import type { ChatDetail } from '../lib/types'
 import { chatToMarkdown, markdownFilename } from '../lib/export-markdown'
@@ -20,10 +21,11 @@ type Status = 'idle' | 'loading' | 'copying' | 'copied' | 'error'
 
 export function ExportMarkdownButton(props: ExportMarkdownButtonProps) {
   const [status, setStatus] = useState<Status>('idle')
+  const fetchDetail = useServerFn(getChatDetail)
 
   async function resolveDetail(): Promise<ChatDetail | null> {
     if (props.detail) return props.detail
-    return getChatDetail({ data: props.chatId })
+    return fetchDetail({ data: props.chatId })
   }
 
   async function download() {

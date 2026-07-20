@@ -1,6 +1,4 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
 import { AppReadyGate } from '../components/AppReadyGate'
 import {
   STARTUP_LOADER_CRITICAL_CSS,
@@ -51,22 +49,19 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]"
         suppressHydrationWarning
       >
-        <div dangerouslySetInnerHTML={{ __html: STARTUP_LOADER_HTML }} />
+        {/*
+          suppressHydrationWarning: the inline dismiss script may hide this node
+          before React hydrates. Without this, hydration errors leave the UI
+          non-interactive (only plain <a> navigation works).
+        */}
+        <div
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: STARTUP_LOADER_HTML }}
+        />
         <AppReadyGate />
         <Header />
         {children}
         <Footer />
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
         <Scripts />
       </body>
     </html>

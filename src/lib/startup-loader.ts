@@ -7,10 +7,11 @@ export function dismissStartupLoader() {
   loader.dataset.dismissed = 'true'
   loader.classList.add('startup-loader--hide')
   document.documentElement.setAttribute('data-app-ready', 'true')
-
+  // Do not remove() immediately — that races React hydration and kills client events.
+  // Keep the node hidden until after the next paint frames.
   window.setTimeout(() => {
     loader.remove()
-  }, 420)
+  }, 1200)
 
   return true
 }
@@ -49,9 +50,10 @@ export const STARTUP_LOADER_DISMISS_SCRIPT = `
     loader.dataset.dismissed = 'true'
     loader.classList.add('startup-loader--hide')
     document.documentElement.setAttribute('data-app-ready', 'true')
+    // Delayed remove avoids React hydration mismatches that break click handlers.
     window.setTimeout(function () {
       loader.remove()
-    }, 420)
+    }, 1200)
   }
 
   function hasAppContent() {

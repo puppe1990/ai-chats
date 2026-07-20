@@ -22,6 +22,7 @@ import type { ChatSource } from '../lib/types'
 import { SOURCE_LABELS } from '../lib/types'
 import { getChats } from '../server/chats'
 import { ChatItem } from './ChatItem'
+import { LoadingSpinner } from './LoadingSpinner'
 import { Pagination } from './Pagination'
 
 const ALL_SOURCES: ChatSource[] = ['cursor', 'grok', 'codex', 'opencode', 'claude']
@@ -248,9 +249,19 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
               : 'Nenhum chat encontrado.'}
         </p>
       ) : (
-        <>
+        <div className="relative">
+          {loading && (
+            <div className="list-loading-overlay">
+              <div className="list-loading-pill" role="status" aria-live="polite">
+                <LoadingSpinner size="sm" />
+                <span className="text-xs font-medium text-[var(--sea-ink-soft)]">
+                  Atualizando lista…
+                </span>
+              </div>
+            </div>
+          )}
           <ul
-            className={`transition-opacity ${loading ? 'opacity-50' : 'opacity-100'} ${
+            className={`transition-opacity duration-200 ${loading ? 'opacity-45' : 'opacity-100'} ${
               viewMode === 'grid'
                 ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3'
                 : 'space-y-2'
@@ -306,7 +317,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
             hasNextPage={data.hasNextPage}
             onPageChange={setPage}
           />
-        </>
+        </div>
       )}
     </div>
   )

@@ -3,12 +3,23 @@ import { SOURCE_LABELS } from './types'
 
 export function filterChats(
   chats: ChatSession[],
-  options: { source?: ChatSource | 'all'; query?: string },
+  options: {
+    source?: ChatSource | 'all'
+    query?: string
+    favoriteIds?: string[]
+    favoritesOnly?: boolean
+  },
 ): ChatSession[] {
   const normalizedQuery = options.query?.trim().toLowerCase() ?? ''
+  const favoriteSet =
+    options.favoritesOnly && options.favoriteIds ? new Set(options.favoriteIds) : null
 
   return chats.filter((chat) => {
     if (options.source && options.source !== 'all' && chat.source !== options.source) {
+      return false
+    }
+
+    if (favoriteSet && !favoriteSet.has(chat.id)) {
       return false
     }
 

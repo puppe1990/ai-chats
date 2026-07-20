@@ -13,6 +13,8 @@ export interface ChatListQuery {
   source?: ChatSource | 'all'
   query?: string
   order?: string[]
+  favoriteIds?: string[]
+  favoritesOnly?: boolean
 }
 
 export interface ChatListResponse {
@@ -27,9 +29,15 @@ export interface ChatListResponse {
   hasNextPage: boolean
   counts: Record<ChatSource, number>
   totalChats: number
+  favoriteCount: number
 }
 
-export function normalizeChatListQuery(input: ChatListQuery): Required<ChatListQuery> {
+export function normalizeChatListQuery(input: ChatListQuery): Required<
+  Omit<ChatListQuery, 'favoriteIds' | 'favoritesOnly'>
+> & {
+  favoriteIds: string[]
+  favoritesOnly: boolean
+} {
   return {
     page: Number.isFinite(input.page) ? Math.max(1, Math.floor(input.page)) : 1,
     pageSize: Number.isFinite(input.pageSize)
@@ -40,6 +48,12 @@ export function normalizeChatListQuery(input: ChatListQuery): Required<ChatListQ
     order: Array.isArray(input.order)
       ? input.order.filter((id): id is string => typeof id === 'string')
       : [],
+    favoriteIds: Array.isArray(input.favoriteIds)
+      ? input.favoriteIds.filter(
+          (id): id is string => typeof id === 'string' && id.length > 0,
+        )
+      : [],
+    favoritesOnly: Boolean(input.favoritesOnly),
   }
 }
 
@@ -55,8 +69,19 @@ export function buildChatListResponse(
   >
   for (const chat of chats) counts[chat.source]++
 
+  const favoriteSet = new Set(query.favoriteIds)
+  const favoriteCount = chats.reduce(
+    (n, chat) => n + (favoriteSet.has(chat.id) ? 1 : 0),
+    0,
+  )
+
   const mergedOrder = mergeChatOrder(query.order, chats)
-  const filtered = filterChats(chats, { source: query.source, query: query.query })
+  const filtered = filterChats(chats, {
+    source: query.source,
+    query: query.query,
+    favoriteIds: query.favoriteIds,
+    favoritesOnly: query.favoritesOnly,
+  })
   const ordered = sortChatsByCustomOrder(filtered, mergedOrder)
   const pagination = paginate(ordered, { page: query.page, pageSize: query.pageSize })
 
@@ -72,5 +97,6 @@ export function buildChatListResponse(
     hasNextPage: pagination.hasNextPage,
     counts,
     totalChats: chats.length,
+    favoriteCount,
   }
 }

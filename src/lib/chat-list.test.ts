@@ -65,5 +65,19 @@ describe('buildChatListResponse', () => {
     expect(result.items[0].id).toBe('grok:2')
     expect(result.counts.codex).toBe(1)
     expect(result.totalChats).toBe(4)
+    expect(result.favoriteCount).toBe(0)
+  })
+
+  it('filters favorites and reports favoriteCount against full set', () => {
+    const result = buildChatListResponse(chats, {
+      page: 1,
+      favoritesOnly: true,
+      favoriteIds: ['grok:1', 'grok:2', 'grok:99'],
+    })
+
+    expect(result.favoriteCount).toBe(2)
+    expect(result.totalItems).toBe(2)
+    expect(result.items.map((c) => c.id)).toEqual(['grok:1', 'grok:2'])
+    expect(result.totalChats).toBe(25)
   })
 })

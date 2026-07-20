@@ -11,6 +11,12 @@ import {
   setChatDragData,
   writeStoredChatOrder,
 } from '../lib/chat-display-order'
+import {
+  isFavorite,
+  readStoredFavorites,
+  toggleFavoriteId,
+  writeStoredFavorites,
+} from '../lib/chat-favorites'
 import { CHAT_PAGE_SIZE, type ChatListResponse } from '../lib/chat-list'
 import type { ChatSource } from '../lib/types'
 import { SOURCE_LABELS } from '../lib/types'
@@ -48,11 +54,13 @@ function isChatDragEvent(event: React.DragEvent) {
 
 export function ChatList({ initialData }: { initialData: ChatListResponse }) {
   const [filter, setFilter] = useState<ChatSource | 'all'>('all')
+  const [favoritesOnly, setFavoritesOnly] = useState(false)
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [page, setPage] = useState(1)
   const [viewMode, setViewMode] = useState<ViewMode>(readStoredViewMode)
   const [chatOrder, setChatOrder] = useState<string[]>(() => readStoredChatOrder())
+  const [favoriteIds, setFavoriteIds] = useState<string[]>(() => readStoredFavorites())
   const [data, setData] = useState(initialData)
   const [loading, setLoading] = useState(false)
   const [draggingChatId, setDraggingChatId] = useState<string | null>(null)
@@ -85,6 +93,8 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
         source: filter,
         query: debouncedQuery,
         order: chatOrder,
+        favoriteIds,
+        favoritesOnly,
       },
     })
       .then((result) => {
@@ -97,16 +107,23 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
     return () => {
       cancelled = true
     }
-  }, [page, filter, debouncedQuery, chatOrder, fetchChats])
+  }, [page, filter, debouncedQuery, chatOrder, favoriteIds, favoritesOnly, fetchChats])
 
   const hasActiveSearch = debouncedQuery.trim().length > 0
-  const hasActiveFilter = filter !== 'all'
+  const hasActiveFilter = filter !== 'all' || favoritesOnly
+  const favoriteCount = data.favoriteCount ?? favoriteIds.length
 
   function commitReorder(draggedId: string, targetId: string) {
     const baseOrder = mergeChatOrder(chatOrder, data.items)
     const nextOrder = reorderChatIds(baseOrder, draggedId, targetId)
     setChatOrder(nextOrder)
     writeStoredChatOrder(nextOrder)
+  }
+
+  function handleToggleFavorite(chatId: string) {
+    const next = toggleFavoriteId(favoriteIds, chatId)
+    setFavoriteIds(next)
+    writeStoredFavorites(next)
   }
 
   return (
@@ -186,6 +203,17 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
           >
             Todos ({data.totalChats})
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              setFavoritesOnly((prev) => !prev)
+              setPage(1)
+            }}
+            aria-pressed={favoritesOnly}
+            className={`rounded-full px-3 py-1 text-sm ${favoritesOnly ? CHIP_ACTIVE : CHIP_INACTIVE}`}
+          >
+            Favoritos ({favoriteCount})
+          </button>
           {ALL_SOURCES.map((source) => (
             <button
               key={source}
@@ -206,17 +234,18 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
         <p className="mb-4 text-xs text-zinc-500">
           {data.totalItems} resultado{data.totalItems !== 1 ? 's' : ''}
           {hasActiveSearch && <> para &ldquo;{debouncedQuery.trim()}&rdquo;</>}
-          {hasActiveFilter && (
-            <> em {filter === 'all' ? 'todos os providers' : SOURCE_LABELS[filter]}</>
-          )}
+          {favoritesOnly && <> nos favoritos</>}
+          {filter !== 'all' && <> em {SOURCE_LABELS[filter]}</>}
         </p>
       )}
 
       {data.totalItems === 0 ? (
         <p className="py-12 text-center text-zinc-500">
-          {hasActiveSearch || hasActiveFilter
-            ? 'Nenhum chat corresponde aos filtros.'
-            : 'Nenhum chat encontrado.'}
+          {favoritesOnly && favoriteCount === 0
+            ? 'Nenhum favorito ainda. Toque em Favoritar em um chat.'
+            : hasActiveSearch || hasActiveFilter
+              ? 'Nenhum chat corresponde aos filtros.'
+              : 'Nenhum chat encontrado.'}
         </p>
       ) : (
         <>
@@ -233,6 +262,8 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
                 key={chat.id}
                 chat={chat}
                 variant={viewMode}
+                isFavorite={isFavorite(favoriteIds, chat.id)}
+                onToggleFavorite={() => handleToggleFavorite(chat.id)}
                 drag={{
                   isDragging: draggingChatId === chat.id,
                   isDropTarget: dropTargetChatId === chat.id,

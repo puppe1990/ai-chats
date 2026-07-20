@@ -55,4 +55,13 @@ describe('filterChats', () => {
     expect(filterChats(sample, { source: 'claude' })).toHaveLength(1)
     expect(filterChats(sample, { query: 'claude code' })).toHaveLength(1)
   })
+
+  it('filters to favorite ids when favoritesOnly is set', () => {
+    const onlyFav = filterChats(sample, {
+      favoritesOnly: true,
+      favoriteIds: ['codex:2', 'missing'],
+    })
+    expect(onlyFav).toHaveLength(1)
+    expect(onlyFav[0].id).toBe('codex:2')
+  })
 })

@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { GripVertical } from 'lucide-react'
+import { GripVertical, Star } from 'lucide-react'
 import { useState } from 'react'
 import { toChatRouteParams } from '../lib/chat-id'
 import type { ChatSession } from '../lib/types'
@@ -31,13 +31,40 @@ function CopyButton({ label, text }: { label: string; text: string }) {
   )
 }
 
-function ChatActions({ chat }: { chat: ChatSession }) {
+function ChatActions({
+  chat,
+  isFavorite,
+  onToggleFavorite,
+}: {
+  chat: ChatSession
+  isFavorite?: boolean
+  onToggleFavorite?: () => void
+}) {
   return (
     <div
       className="border-t border-zinc-100 px-4 py-2.5 dark:border-zinc-800 flex items-center gap-1 flex-wrap"
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
     >
+      {onToggleFavorite && (
+        <button
+          type="button"
+          onClick={onToggleFavorite}
+          aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+          aria-pressed={Boolean(isFavorite)}
+          className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition ${
+            isFavorite
+              ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-950/70'
+              : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
+          }`}
+        >
+          <Star
+            className={`h-3.5 w-3.5 ${isFavorite ? 'fill-current' : ''}`}
+            aria-hidden
+          />
+          {isFavorite ? 'Favorito' : 'Favoritar'}
+        </button>
+      )}
       <ExportMarkdownButton chatId={chat.id} />
       <CopyButton label="Copy ID" text={chat.id} />
       <CopyButton
@@ -61,10 +88,14 @@ export function ChatItem({
   chat,
   variant = 'list',
   drag,
+  isFavorite = false,
+  onToggleFavorite,
 }: {
   chat: ChatSession
   variant?: 'list' | 'grid'
   drag?: ChatItemDragProps
+  isFavorite?: boolean
+  onToggleFavorite?: () => void
 }) {
   const { source, sessionId } = toChatRouteParams(chat.id)
   const cardClass =
@@ -75,6 +106,7 @@ export function ChatItem({
     drag?.isDropTarget
       ? 'ring-2 ring-zinc-400 ring-offset-2 ring-offset-[var(--bg-base)] dark:ring-zinc-500'
       : '',
+    isFavorite ? 'border-amber-200/80 dark:border-amber-900/50' : '',
   ]
     .filter(Boolean)
     .join(' ')
@@ -94,6 +126,13 @@ export function ChatItem({
     </button>
   ) : null
 
+  const favoriteBadge = isFavorite ? (
+    <Star
+      className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-500 dark:fill-amber-400 dark:text-amber-400"
+      aria-label="Favorito"
+    />
+  ) : null
+
   if (variant === 'grid') {
     return (
       <li
@@ -110,7 +149,10 @@ export function ChatItem({
               className="flex flex-1 flex-col gap-2 pb-3 no-underline data-[status=pending]:opacity-90"
             >
               <div className="flex items-center justify-between gap-2">
-                <SourceBadge source={chat.source} />
+                <div className="flex items-center gap-1.5">
+                  <SourceBadge source={chat.source} />
+                  {favoriteBadge}
+                </div>
                 <RelativeTime iso={chat.updatedAt} />
               </div>
               <p className="font-medium text-zinc-900 line-clamp-2 dark:text-zinc-100">
@@ -124,7 +166,11 @@ export function ChatItem({
               )}
             </Link>
           </div>
-          <ChatActions chat={chat} />
+          <ChatActions
+            chat={chat}
+            isFavorite={isFavorite}
+            onToggleFavorite={onToggleFavorite}
+          />
         </div>
       </li>
     )
@@ -143,6 +189,7 @@ export function ChatItem({
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <SourceBadge source={chat.source} />
+                {favoriteBadge}
                 <RelativeTime iso={chat.updatedAt} />
               </div>
               <p className="font-medium text-zinc-900 truncate dark:text-zinc-100">
@@ -159,7 +206,11 @@ export function ChatItem({
             )}
           </Link>
         </div>
-        <ChatActions chat={chat} />
+        <ChatActions
+          chat={chat}
+          isFavorite={isFavorite}
+          onToggleFavorite={onToggleFavorite}
+        />
       </div>
     </li>
   )

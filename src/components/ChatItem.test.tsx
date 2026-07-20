@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import type { ChatSession } from '../lib/types'
 import { ChatItem } from './ChatItem'
@@ -71,5 +71,24 @@ describe('ChatItem', () => {
       'href',
       '/chat/claude/59d60b82-b957-48e6-adff-c1cfd70a2470',
     )
+  })
+
+  it('toggles favorite from the action button', () => {
+    const onToggleFavorite = vi.fn()
+    render(
+      <ChatItem chat={chat} isFavorite={false} onToggleFavorite={onToggleFavorite} />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar aos favoritos' }))
+    expect(onToggleFavorite).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows favorite state when starred', () => {
+    render(<ChatItem chat={chat} isFavorite onToggleFavorite={() => {}} />)
+
+    expect(
+      screen.getByRole('button', { name: 'Remover dos favoritos' }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByLabelText('Favorito')).toBeInTheDocument()
   })
 })

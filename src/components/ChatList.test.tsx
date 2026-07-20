@@ -87,6 +87,10 @@ describe('ChatList', () => {
           source: (data.source as 'all') ?? 'all',
           query: String(data.query ?? ''),
           order: Array.isArray(data.order) ? (data.order as string[]) : [],
+          favoriteIds: Array.isArray(data.favoriteIds)
+            ? (data.favoriteIds as string[])
+            : [],
+          favoritesOnly: Boolean(data.favoritesOnly),
         }),
     )
   })
@@ -95,6 +99,7 @@ describe('ChatList', () => {
     render(<ChatList initialData={initialData()} />)
 
     expect(screen.getByLabelText('Buscar chats')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Favoritos/ })).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: 'Visualização em lista' }),
     ).toBeInTheDocument()
@@ -138,6 +143,39 @@ describe('ChatList', () => {
       expect(screen.getByText('Build chat aggregator')).toBeInTheDocument()
       expect(screen.queryByText('Limpar HD com script')).not.toBeInTheDocument()
       expect(screen.getByText(/1 resultado/)).toBeInTheDocument()
+    })
+  })
+
+  it('favorites a chat and filters to favorites only', async () => {
+    render(<ChatList initialData={initialData()} />)
+
+    fireEvent.click(
+      screen.getAllByRole('button', { name: 'Adicionar aos favoritos' })[0],
+    )
+
+    await waitFor(() => {
+      expect(window.localStorage.getItem('ai-chats:favorites')).toBe(
+        JSON.stringify(['grok:1']),
+      )
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Favoritos/ }))
+
+    await waitFor(() => {
+      expect(mockFetchChats).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            favoritesOnly: true,
+            favoriteIds: ['grok:1'],
+          }),
+        }),
+      )
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Build chat aggregator')).toBeInTheDocument()
+      expect(screen.queryByText('Limpar HD com script')).not.toBeInTheDocument()
+      expect(screen.getByText(/nos favoritos/)).toBeInTheDocument()
     })
   })
 

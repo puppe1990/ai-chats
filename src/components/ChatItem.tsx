@@ -50,7 +50,11 @@ function ChatActions({
       {onToggleFavorite && (
         <button
           type="button"
-          onClick={onToggleFavorite}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            onToggleFavorite()
+          }}
           aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
           aria-pressed={Boolean(isFavorite)}
           className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition ${

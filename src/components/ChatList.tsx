@@ -1,7 +1,7 @@
 'use client'
 import { useServerFn } from '@tanstack/react-start'
 import { LayoutGrid, List } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   CHAT_DRAG_MIME,
   mergeChatOrder,
@@ -67,7 +67,13 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
   const [draggingChatId, setDraggingChatId] = useState<string | null>(null)
   const [dropTargetChatId, setDropTargetChatId] = useState<string | null>(null)
   const skipInitialFetch = useRef(true)
+  const fetchGeneration = useRef(0)
+  const favoriteIdsRef = useRef(favoriteIds)
   const fetchChats = useServerFn(getChats)
+
+  useEffect(() => {
+    favoriteIdsRef.current = favoriteIds
+  }, [favoriteIds])
 
   useEffect(() => {
     window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, viewMode)
@@ -78,15 +84,20 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
     return () => window.clearTimeout(timer)
   }, [query])
 
+  /**
+   * Server refetch for pagination/filters/order.
+   * favoriteIds is read from a ref so starring a chat stays local + instant
+   * (a full aggregate refetch freezes the UI for seconds).
+   */
   useEffect(() => {
-    let cancelled = false
-
     if (skipInitialFetch.current) {
       skipInitialFetch.current = false
       return
     }
 
+    const generation = ++fetchGeneration.current
     setLoading(true)
+
     fetchChats({
       data: {
         page,
@@ -94,25 +105,36 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
         source: filter,
         query: debouncedQuery,
         order: chatOrder,
-        favoriteIds,
+        favoriteIds: favoriteIdsRef.current,
         favoritesOnly,
       },
     })
       .then((result) => {
-        if (!cancelled) setData(result)
+        if (generation !== fetchGeneration.current) return
+        setData(result)
+      })
+      .catch((err: unknown) => {
+        console.error('[ChatList] failed to load chats', err)
       })
       .finally(() => {
-        if (!cancelled) setLoading(false)
+        if (generation === fetchGeneration.current) {
+          setLoading(false)
+        }
       })
-
-    return () => {
-      cancelled = true
-    }
-  }, [page, filter, debouncedQuery, chatOrder, favoriteIds, favoritesOnly, fetchChats])
+  }, [page, filter, debouncedQuery, chatOrder, favoritesOnly, fetchChats])
 
   const hasActiveSearch = debouncedQuery.trim().length > 0
   const hasActiveFilter = filter !== 'all' || favoritesOnly
-  const favoriteCount = data.favoriteCount ?? favoriteIds.length
+  // Local set so the Favoritos chip updates the instant a star is toggled.
+  const favoriteCount = favoriteIds.length
+
+  // Keep favorites filter in sync with local star toggles without network.
+  const visibleItems = useMemo(() => {
+    if (!favoritesOnly) return data.items
+    return data.items.filter((chat) => favoriteIds.includes(chat.id))
+  }, [data.items, favoritesOnly, favoriteIds])
+
+  const visibleTotalItems = favoritesOnly ? visibleItems.length : data.totalItems
 
   function commitReorder(draggedId: string, targetId: string) {
     const baseOrder = mergeChatOrder(chatOrder, data.items)
@@ -122,9 +144,11 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
   }
 
   function handleToggleFavorite(chatId: string) {
-    const next = toggleFavoriteId(favoriteIds, chatId)
-    setFavoriteIds(next)
-    writeStoredFavorites(next)
+    setFavoriteIds((prev) => {
+      const next = toggleFavoriteId(prev, chatId)
+      writeStoredFavorites(next)
+      return next
+    })
   }
 
   return (
@@ -233,14 +257,14 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
 
       {(hasActiveSearch || hasActiveFilter) && (
         <p className="mb-4 text-xs text-zinc-500">
-          {data.totalItems} resultado{data.totalItems !== 1 ? 's' : ''}
+          {visibleTotalItems} resultado{visibleTotalItems !== 1 ? 's' : ''}
           {hasActiveSearch && <> para &ldquo;{debouncedQuery.trim()}&rdquo;</>}
           {favoritesOnly && <> nos favoritos</>}
           {filter !== 'all' && <> em {SOURCE_LABELS[filter]}</>}
         </p>
       )}
 
-      {data.totalItems === 0 ? (
+      {visibleTotalItems === 0 ? (
         <p className="py-12 text-center text-zinc-500">
           {favoritesOnly && favoriteCount === 0
             ? 'Nenhum favorito ainda. Toque em Favoritar em um chat.'
@@ -249,7 +273,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
               : 'Nenhum chat encontrado.'}
         </p>
       ) : (
-        <div className={`relative ${loading ? 'cursor-wait' : ''}`}>
+        <div className="relative">
           {loading && (
             <div className="list-loading-overlay">
               <div className="list-loading-pill" role="status" aria-live="polite">
@@ -261,14 +285,14 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
             </div>
           )}
           <ul
-            className={`transition-opacity duration-200 ${loading ? 'opacity-40 pointer-events-none' : 'opacity-100'} ${
+            className={`transition-opacity duration-200 ${loading ? 'opacity-70' : 'opacity-100'} ${
               viewMode === 'grid'
                 ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3'
                 : 'space-y-2'
             }`}
             aria-busy={loading}
           >
-            {data.items.map((chat) => (
+            {visibleItems.map((chat) => (
               <ChatItem
                 key={chat.id}
                 chat={chat}
@@ -307,16 +331,18 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
               />
             ))}
           </ul>
-          <Pagination
-            page={data.page}
-            totalPages={data.totalPages}
-            totalItems={data.totalItems}
-            startIndex={data.startIndex}
-            endIndex={data.endIndex}
-            hasPreviousPage={data.hasPreviousPage}
-            hasNextPage={data.hasNextPage}
-            onPageChange={setPage}
-          />
+          {!favoritesOnly && (
+            <Pagination
+              page={data.page}
+              totalPages={data.totalPages}
+              totalItems={data.totalItems}
+              startIndex={data.startIndex}
+              endIndex={data.endIndex}
+              hasPreviousPage={data.hasPreviousPage}
+              hasNextPage={data.hasNextPage}
+              onPageChange={setPage}
+            />
+          )}
         </div>
       )}
     </div>

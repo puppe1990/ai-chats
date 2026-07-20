@@ -146,8 +146,9 @@ describe('ChatList', () => {
     })
   })
 
-  it('favorites a chat and filters to favorites only', async () => {
+  it('favorites a chat instantly without refetch, then filters favorites', async () => {
     render(<ChatList initialData={initialData()} />)
+    mockFetchChats.mockClear()
 
     fireEvent.click(
       screen.getAllByRole('button', { name: 'Adicionar aos favoritos' })[0],
@@ -158,8 +159,13 @@ describe('ChatList', () => {
         JSON.stringify(['grok:1']),
       )
     })
+    // Star toggle must stay local — a full list refetch freezes the UI.
+    expect(mockFetchChats).not.toHaveBeenCalled()
+    expect(
+      screen.getByRole('button', { name: 'Remover dos favoritos' }),
+    ).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: /Favoritos/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Favoritos \(1\)/ }))
 
     await waitFor(() => {
       expect(mockFetchChats).toHaveBeenCalledWith(

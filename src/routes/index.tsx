@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { getChats } from '../lib/desktop-api'
 import { ChatList } from '../components/ChatList'
 import { ChatListSkeleton } from '../components/ChatListSkeleton'
@@ -22,10 +23,12 @@ export const Route = createFileRoute('/')({
 })
 
 function HomePending() {
+  const { t } = useTranslation()
+
   return (
     <PageLoadingState
-      title="Carregando chats..."
-      description="Lendo sessões do Cursor, Grok, Codex, OpenCode e Claude Code"
+      title={t('home.loadingTitle')}
+      description={t('app.loadingProviders')}
     >
       <header className="mb-8">
         <div className="h-8 w-40 rounded skeleton-shimmer mb-2" />
@@ -37,15 +40,14 @@ function HomePending() {
 }
 
 function Home() {
+  const { t } = useTranslation()
   const chatList = Route.useLoaderData()
   return (
     <main className="min-h-screen pb-24 text-[var(--sea-ink)]">
       <div className="mx-auto max-w-6xl px-6 py-10">
         <header className="mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight">AI Chats</h1>
-          <p className="text-sm text-[var(--sea-ink-soft)] mt-1">
-            Cursor, Grok, Codex, OpenCode & Claude Code — sorted by most recent
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('home.title')}</h1>
+          <p className="text-sm text-[var(--sea-ink-soft)] mt-1">{t('app.tagline')}</p>
         </header>
         <ChatList initialData={chatList} />
       </div>

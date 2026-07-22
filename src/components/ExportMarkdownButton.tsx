@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getChatDetail } from '../lib/desktop-api'
 import { chatToMarkdown, markdownFilename } from '../lib/export-markdown'
 import type { ChatDetail } from '../lib/types'
@@ -17,6 +18,7 @@ type ExportMarkdownButtonProps =
 type Status = 'idle' | 'loading' | 'copying' | 'copied' | 'error'
 
 export function ExportMarkdownButton(props: ExportMarkdownButtonProps) {
+  const { t } = useTranslation()
   const [status, setStatus] = useState<Status>('idle')
 
   async function resolveDetail(): Promise<ChatDetail | null> {
@@ -79,7 +81,7 @@ export function ExportMarkdownButton(props: ExportMarkdownButtonProps) {
         disabled={isBusy}
         className={BUTTON_PRIMARY}
       >
-        {status === 'loading' ? 'Exportando...' : 'Exportar .md'}
+        {status === 'loading' ? t('export.exporting') : t('export.exportMd')}
       </button>
       <button
         type="button"
@@ -89,12 +91,12 @@ export function ExportMarkdownButton(props: ExportMarkdownButtonProps) {
       >
         {status === 'copying' && <LoadingSpinner size="sm" />}
         {status === 'copied'
-          ? 'Copiado!'
+          ? t('export.copied')
           : status === 'error'
-            ? 'Erro ao copiar'
+            ? t('export.copyError')
             : status === 'copying'
-              ? 'Copiando...'
-              : 'Copiar MD'}
+              ? t('export.copying')
+              : t('export.copyMd')}
       </button>
     </div>
   )

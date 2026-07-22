@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouterState } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { LoadingSpinner } from './LoadingSpinner'
 
 function selectIsNavigating(state: {
@@ -30,6 +31,7 @@ function selectIsNavigating(state: {
  * - floating status pill with spinner + label
  */
 export function NavigationProgress() {
+  const { t } = useTranslation()
   const isPending = useRouterState({ select: selectIsNavigating })
 
   if (!isPending) return null
@@ -52,7 +54,7 @@ export function NavigationProgress() {
         <div className="nav-loading-pill">
           <LoadingSpinner size="sm" />
           <span className="text-xs font-semibold tracking-tight text-[var(--sea-ink)]">
-            Carregando…
+            {t('nav.loading')}
           </span>
         </div>
       </div>

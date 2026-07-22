@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 type ThemeMode = 'light' | 'dark'
 
@@ -17,6 +18,7 @@ function applyThemeMode(mode: ThemeMode) {
 }
 
 export default function ThemeToggle() {
+  const { t } = useTranslation()
   const [mode, setMode] = useState<ThemeMode>('light')
   const [ready, setReady] = useState(false)
 
@@ -35,7 +37,8 @@ export default function ThemeToggle() {
     window.localStorage.setItem('theme', nextMode)
   }
 
-  const label = `Tema: ${mode === 'dark' ? 'escuro' : 'claro'}. Clique para alternar.`
+  const modeLabel = mode === 'dark' ? t('theme.modeDark') : t('theme.modeLight')
+  const label = t('theme.toggleAria', { mode: modeLabel })
 
   return (
     <button
@@ -46,7 +49,7 @@ export default function ThemeToggle() {
       suppressHydrationWarning
       className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] shadow-[0_8px_22px_rgba(30,90,72,0.08)] transition hover:-translate-y-0.5"
     >
-      {!ready ? '☀️ Claro' : mode === 'dark' ? '🌙 Escuro' : '☀️ Claro'}
+      {!ready || mode === 'light' ? t('theme.light') : t('theme.dark')}
     </button>
   )
 }

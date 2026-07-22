@@ -53,9 +53,11 @@
     "@tanstack/router-plugin": "^1.132.0",
     "@tauri-apps/api": "^2.11.1",
     "better-sqlite3": "^12.11.1",
+    "i18next": "^26.3.6",
     "lucide-react": "^0.545.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-i18next": "^17.0.10",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {

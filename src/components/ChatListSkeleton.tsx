@@ -1,6 +1,6 @@
 export function ChatListSkeleton({ count = 8 }: { count?: number }) {
   return (
-    <div className="space-y-4" aria-busy="true" aria-label="Carregando chats">
+    <div className="space-y-4" aria-busy="true" aria-label="Loading chats">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="h-10 flex-1 rounded-lg skeleton-shimmer" />
         <div className="h-10 w-40 rounded-lg skeleton-shimmer" />

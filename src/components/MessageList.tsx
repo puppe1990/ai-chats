@@ -1,5 +1,6 @@
 import { ArrowDown } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ChatMessage } from '../lib/types'
 import { getScrollMetrics, isNearBottom, scrollToBottom } from '../lib/chat-scroll'
 import { FormattedDate } from './FormattedDate'
@@ -12,14 +13,21 @@ const ROLE_STYLES: Record<ChatMessage['role'], string> = {
   tool: 'bg-zinc-50 border-zinc-200 text-zinc-500 text-xs font-mono dark:bg-zinc-900/40 dark:border-zinc-800/50',
 }
 
-const ROLE_LABELS: Record<ChatMessage['role'], string> = {
-  user: 'Você',
-  assistant: 'Assistente',
-  system: 'Sistema',
-  tool: 'Ferramenta',
+const ROLE_KEYS: Record<
+  ChatMessage['role'],
+  | 'messages.roleUser'
+  | 'messages.roleAssistant'
+  | 'messages.roleSystem'
+  | 'messages.roleTool'
+> = {
+  user: 'messages.roleUser',
+  assistant: 'messages.roleAssistant',
+  system: 'messages.roleSystem',
+  tool: 'messages.roleTool',
 }
 
 export function MessageList({ messages }: { messages: ChatMessage[] }) {
+  const { t } = useTranslation()
   const [showJumpButton, setShowJumpButton] = useState(false)
   // Reset jump button when the conversation changes (render-time state adjust).
   const [seenMessages, setSeenMessages] = useState(messages)
@@ -44,11 +52,7 @@ export function MessageList({ messages }: { messages: ChatMessage[] }) {
   }, [])
 
   if (messages.length === 0) {
-    return (
-      <p className="text-zinc-500 text-center py-12">
-        Nenhuma mensagem encontrada para este chat.
-      </p>
-    )
+    return <p className="text-zinc-500 text-center py-12">{t('messages.empty')}</p>
   }
 
   return (
@@ -60,7 +64,7 @@ export function MessageList({ messages }: { messages: ChatMessage[] }) {
             className={`rounded-lg border px-4 py-3 shadow-sm dark:shadow-none ${ROLE_STYLES[msg.role]}`}
           >
             <p className="text-xs font-medium text-zinc-500 mb-1.5">
-              {ROLE_LABELS[msg.role]}
+              {t(ROLE_KEYS[msg.role])}
               {msg.timestamp && (
                 <FormattedDate iso={msg.timestamp} className="ml-2 font-normal" />
               )}
@@ -75,7 +79,7 @@ export function MessageList({ messages }: { messages: ChatMessage[] }) {
       {showJumpButton && (
         <button
           type="button"
-          aria-label="Ir para o final"
+          aria-label={t('messages.jumpToBottom')}
           onClick={() => scrollToBottom('smooth')}
           className="fixed bottom-6 left-1/2 z-50 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full border border-zinc-200 bg-white/95 text-zinc-700 shadow-lg backdrop-blur transition hover:border-zinc-300 hover:bg-white dark:border-zinc-700 dark:bg-zinc-900/95 dark:text-zinc-200 dark:hover:border-zinc-600 dark:hover:bg-zinc-900"
         >

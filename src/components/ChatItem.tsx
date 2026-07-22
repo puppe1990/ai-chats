@@ -1,7 +1,9 @@
 import { Link } from '@tanstack/react-router'
 import { GripVertical, Star } from 'lucide-react'
 import { useState } from 'react'
-import { toChatRouteParams } from '../lib/chat-id'
+import { useTranslation } from 'react-i18next'
+import { formatCopyId, toChatRouteParams } from '../lib/chat-id'
+import { copyText } from '../lib/clipboard'
 import type { ChatSession } from '../lib/types'
 import { ExportMarkdownButton } from './ExportMarkdownButton'
 import { LoadingSpinner } from './LoadingSpinner'
@@ -9,17 +11,26 @@ import { RelativeTime } from './RelativeTime'
 import { SourceBadge } from './SourceBadge'
 
 function CopyButton({ label, text }: { label: string; text: string }) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
 
-  async function handleCopy() {
-    await navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  async function handleCopy(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault()
+    event.stopPropagation()
+    try {
+      await copyText(text)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('[CopyButton] failed to copy', err, text)
+    }
   }
 
   return (
     <button
+      type="button"
       onClick={handleCopy}
+      title={text}
       className="demo-button-secondary demo-button"
       style={{
         padding: '0.35rem 0.65rem',
@@ -27,7 +38,7 @@ function CopyButton({ label, text }: { label: string; text: string }) {
         borderRadius: '0.5rem',
       }}
     >
-      {copied ? 'Copied!' : label}
+      {copied ? t('chatItem.copied') : label}
     </button>
   )
 }
@@ -41,6 +52,8 @@ function ChatActions({
   isFavorite?: boolean
   onToggleFavorite?: () => void
 }) {
+  const { t } = useTranslation()
+
   return (
     <div
       className="border-t border-zinc-100 px-4 py-2.5 dark:border-zinc-800 flex items-center gap-1 flex-wrap"
@@ -55,7 +68,9 @@ function ChatActions({
             e.stopPropagation()
             onToggleFavorite()
           }}
-          aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+          aria-label={
+            isFavorite ? t('chatItem.removeFavorite') : t('chatItem.addFavorite')
+          }
           aria-pressed={Boolean(isFavorite)}
           className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition ${
             isFavorite
@@ -67,13 +82,16 @@ function ChatActions({
             className={`h-3.5 w-3.5 ${isFavorite ? 'fill-current' : ''}`}
             aria-hidden
           />
-          {isFavorite ? 'Favorito' : 'Favoritar'}
+          {isFavorite ? t('chatItem.favorite') : t('chatItem.favoritar')}
         </button>
       )}
       <ExportMarkdownButton chatId={chat.id} />
-      <CopyButton label="Copy ID" text={chat.id} />
       <CopyButton
-        label="Copy All"
+        label={t('chatItem.copyId')}
+        text={formatCopyId(chat.id, chat.source)}
+      />
+      <CopyButton
+        label={t('chatItem.copyAll')}
         text={`${chat.title}\n${chat.source} | ${chat.updatedAt}${chat.cwd ? ` | ${chat.cwd}` : ''}`}
       />
     </div>
@@ -102,6 +120,7 @@ export function ChatItem({
   isFavorite?: boolean
   onToggleFavorite?: () => void
 }) {
+  const { t } = useTranslation()
   const { source, sessionId } = toChatRouteParams(chat.id)
   const cardClass =
     'group relative rounded-lg border border-zinc-200 bg-white/80 shadow-sm transition hover:border-zinc-300 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/50 dark:shadow-none dark:hover:border-zinc-700 dark:hover:bg-zinc-900 has-[[data-status=pending]]:border-[var(--lagoon)] has-[[data-status=pending]]:ring-2 has-[[data-status=pending]]:ring-[color-mix(in_oklab,var(--lagoon)_45%,transparent)] has-[[data-status=pending]]:bg-[color-mix(in_oklab,var(--lagoon)_8%,white)] dark:has-[[data-status=pending]]:bg-[color-mix(in_oklab,var(--lagoon)_12%,#0f1a1e)]'
@@ -123,7 +142,7 @@ export function ChatItem({
     <button
       type="button"
       draggable
-      aria-label={`Reordenar chat ${chat.title}`}
+      aria-label={t('chatItem.reorderAria', { title: chat.title })}
       className="mt-0.5 inline-flex shrink-0 cursor-grab rounded-md p-1 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600 active:cursor-grabbing dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
       onDragStart={drag.onDragStart}
       onDragEnd={drag.onDragEnd}
@@ -137,7 +156,7 @@ export function ChatItem({
   const favoriteBadge = isFavorite ? (
     <Star
       className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-500 dark:fill-amber-400 dark:text-amber-400"
-      aria-label="Favorito"
+      aria-label={t('chatItem.favorite')}
     />
   ) : null
 
@@ -169,12 +188,12 @@ export function ChatItem({
               {chat.cwd && <p className="text-xs text-zinc-500 truncate">{chat.cwd}</p>}
               {chat.messageCount != null && (
                 <span className="mt-auto text-xs text-zinc-400 tabular-nums dark:text-zinc-600">
-                  {chat.messageCount} msgs
+                  {t('chatItem.msgs', { count: chat.messageCount })}
                 </span>
               )}
               <span className="chat-item-pending-badge" aria-hidden>
                 <LoadingSpinner size="sm" />
-                <span>Abrindo…</span>
+                <span>{t('chatItem.opening')}</span>
               </span>
             </Link>
           </div>
@@ -213,12 +232,12 @@ export function ChatItem({
             </div>
             {chat.messageCount != null && (
               <span className="text-xs text-zinc-400 tabular-nums dark:text-zinc-600">
-                {chat.messageCount} msgs
+                {t('chatItem.msgs', { count: chat.messageCount })}
               </span>
             )}
             <span className="chat-item-pending-badge" aria-hidden>
               <LoadingSpinner size="sm" />
-              <span>Abrindo…</span>
+              <span>{t('chatItem.opening')}</span>
             </span>
           </Link>
         </div>

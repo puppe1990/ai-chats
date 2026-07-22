@@ -1,5 +1,6 @@
 import { LayoutGrid, List } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   CHAT_DRAG_MIME,
   mergeChatOrder,
@@ -52,6 +53,7 @@ function isChatDragEvent(event: React.DragEvent) {
 }
 
 export function ChatList({ initialData }: { initialData: ChatListResponse }) {
+  const { t } = useTranslation()
   const [filter, setFilter] = useState<ChatSource | 'all'>('all')
   const [favoritesOnly, setFavoritesOnly] = useState(false)
   const [query, setQuery] = useState('')
@@ -159,8 +161,8 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
               setQuery(e.target.value)
               setPage(1)
             }}
-            placeholder="Buscar por título, pasta, provider ou modelo..."
-            aria-label="Buscar chats"
+            placeholder={t('chatList.searchPlaceholder')}
+            aria-label={t('chatList.searchAria')}
             className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 shadow-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300 dark:border-zinc-800 dark:bg-zinc-900/80 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600 dark:focus:ring-zinc-600"
           />
           {query.trim().length > 0 && (
@@ -172,7 +174,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
               }}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
-              Limpar
+              {t('chatList.clear')}
             </button>
           )}
         </div>
@@ -180,39 +182,36 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
         <div
           className="inline-flex shrink-0 items-center gap-1 self-start rounded-lg border border-zinc-200 bg-white p-1 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80"
           role="group"
-          aria-label="Modo de visualização"
+          aria-label={t('chatList.viewModeAria')}
         >
           <button
             type="button"
             onClick={() => setViewMode('list')}
             aria-pressed={viewMode === 'list'}
-            aria-label="Visualização em lista"
+            aria-label={t('chatList.listViewAria')}
             className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${viewMode === 'list' ? VIEW_TOGGLE_ACTIVE : VIEW_TOGGLE_INACTIVE}`}
           >
             <List className="h-4 w-4" aria-hidden />
-            Lista
+            {t('chatList.listView')}
           </button>
           <button
             type="button"
             onClick={() => setViewMode('grid')}
             aria-pressed={viewMode === 'grid'}
-            aria-label="Visualização em grade"
+            aria-label={t('chatList.gridViewAria')}
             className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${viewMode === 'grid' ? VIEW_TOGGLE_ACTIVE : VIEW_TOGGLE_INACTIVE}`}
           >
             <LayoutGrid className="h-4 w-4" aria-hidden />
-            Grade
+            {t('chatList.gridView')}
           </button>
         </div>
       </div>
 
-      <p className="mb-4 text-xs text-zinc-500">
-        Arraste pelo ícone de alça para reordenar os chats. A ordem fica salva neste
-        navegador.
-      </p>
+      <p className="mb-4 text-xs text-zinc-500">{t('chatList.reorderHint')}</p>
 
       <div className="mb-2">
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
-          Provider
+          {t('chatList.provider')}
         </p>
         <div className="flex flex-wrap gap-2">
           <button
@@ -223,7 +222,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
             }}
             className={`rounded-full px-3 py-1 text-sm ${filter === 'all' ? CHIP_ACTIVE : CHIP_INACTIVE}`}
           >
-            Todos ({data.totalChats})
+            {t('chatList.all', { count: data.totalChats })}
           </button>
           <button
             type="button"
@@ -234,7 +233,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
             aria-pressed={favoritesOnly}
             className={`rounded-full px-3 py-1 text-sm ${favoritesOnly ? CHIP_ACTIVE : CHIP_INACTIVE}`}
           >
-            Favoritos ({favoriteCount})
+            {t('chatList.favorites', { count: favoriteCount })}
           </button>
           {ALL_SOURCES.map((source) => (
             <button
@@ -246,7 +245,10 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
               }}
               className={`rounded-full px-3 py-1 text-sm ${filter === source ? CHIP_ACTIVE : CHIP_INACTIVE}`}
             >
-              {SOURCE_LABELS[source]} ({data.counts[source]})
+              {t('chatList.sourceCount', {
+                label: SOURCE_LABELS[source],
+                count: data.counts[source],
+              })}
             </button>
           ))}
         </div>
@@ -254,20 +256,22 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
 
       {(hasActiveSearch || hasActiveFilter) && (
         <p className="mb-4 text-xs text-zinc-500">
-          {visibleTotalItems} resultado{visibleTotalItems !== 1 ? 's' : ''}
-          {hasActiveSearch && <> para &ldquo;{debouncedQuery.trim()}&rdquo;</>}
-          {favoritesOnly && <> nos favoritos</>}
-          {filter !== 'all' && <> em {SOURCE_LABELS[filter]}</>}
+          {t('chatList.results', { count: visibleTotalItems })}
+          {hasActiveSearch &&
+            t('chatList.resultsFor', { query: debouncedQuery.trim() })}
+          {favoritesOnly && t('chatList.resultsFavorites')}
+          {filter !== 'all' &&
+            t('chatList.resultsIn', { source: SOURCE_LABELS[filter] })}
         </p>
       )}
 
       {visibleTotalItems === 0 ? (
         <p className="py-12 text-center text-zinc-500">
           {favoritesOnly && favoriteCount === 0
-            ? 'Nenhum favorito ainda. Toque em Favoritar em um chat.'
+            ? t('chatList.emptyFavorites')
             : hasActiveSearch || hasActiveFilter
-              ? 'Nenhum chat corresponde aos filtros.'
-              : 'Nenhum chat encontrado.'}
+              ? t('chatList.emptyFiltered')
+              : t('chatList.empty')}
         </p>
       ) : (
         <div className="relative">
@@ -276,7 +280,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
               <div className="list-loading-pill" role="status" aria-live="polite">
                 <LoadingSpinner size="sm" />
                 <span className="text-xs font-semibold text-[var(--sea-ink)]">
-                  Atualizando lista…
+                  {t('chatList.updatingList')}
                 </span>
               </div>
             </div>

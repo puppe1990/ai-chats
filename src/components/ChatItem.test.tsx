@@ -91,4 +91,56 @@ describe('ChatItem', () => {
     ).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByLabelText('Favorito')).toBeInTheDocument()
   })
+
+  it('copies grok id as resume command', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText } })
+
+    const grokChat: ChatSession = {
+      ...chat,
+      id: 'grok:session-abc-123',
+      source: 'grok',
+      title: 'Grok session',
+    }
+    render(<ChatItem chat={grokChat} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copiar ID' }))
+    expect(writeText).toHaveBeenCalledWith('grok --resume session-abc-123')
+  })
+
+  it('falls back to execCommand when clipboard API fails (Tauri)', async () => {
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: vi.fn().mockRejectedValue(new Error('denied')),
+      },
+    })
+    const copiedValues: string[] = []
+    Object.defineProperty(document, 'execCommand', {
+      configurable: true,
+      value: (command: string) => {
+        if (command === 'copy') {
+          const textarea = document.querySelector('textarea')
+          if (textarea) copiedValues.push(textarea.value)
+          return true
+        }
+        return false
+      },
+    })
+
+    const grokChat: ChatSession = {
+      ...chat,
+      id: 'grok:019f0219-5579-7a71-b49b-13806a68763d',
+      source: 'grok',
+      title: 'Grok session',
+    }
+    render(<ChatItem chat={grokChat} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copiar ID' }))
+    await vi.waitFor(() => {
+      expect(copiedValues).toEqual([
+        'grok --resume 019f0219-5579-7a71-b49b-13806a68763d',
+      ])
+    })
+    expect(await screen.findByRole('button', { name: 'Copiado!' })).toBeInTheDocument()
+  })
 })

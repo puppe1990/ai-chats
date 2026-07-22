@@ -20,3 +20,29 @@ export function toChatRouteParams(chatId: string): {
 export function fromChatRouteParams(source: string, sessionId: string): string {
   return `${source}:${decodeURIComponent(sessionId)}`
 }
+
+/**
+ * Clipboard text for "Copy ID".
+ * Grok always becomes a ready-to-run: `grok --resume {sessionId}`
+ */
+export function formatCopyId(chatId: string, source?: ChatSource | string): string {
+  const idx = chatId.indexOf(':')
+  let sessionId = chatId
+  let resolvedSource = source
+
+  if (idx !== -1) {
+    const prefix = chatId.slice(0, idx)
+    if (SOURCES.includes(prefix as ChatSource)) {
+      resolvedSource = resolvedSource ?? prefix
+      sessionId = chatId.slice(idx + 1)
+    }
+  }
+
+  if (resolvedSource === 'grok') {
+    // Guard against double-prefix if id was already a resume command.
+    const bare = sessionId.replace(/^grok\s+--resume\s+/i, '').trim()
+    return `grok --resume ${bare}`
+  }
+
+  return chatId
+}

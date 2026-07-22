@@ -146,19 +146,18 @@ find_desktop_app() {
 }
 
 # Prefer Tauri bundle outputs (release then debug), then Applications.
+# Cargo workspace puts artifacts under $ROOT/target (not only src-tauri/target).
 find_tauri_app() {
   local candidates=(
+    "$ROOT_DIR/target/release/bundle/macos/${AI_CHATS_APP_NAME}.app"
+    "$ROOT_DIR/target/release/bundle/macos/AI Chats.app"
     "$ROOT_DIR/src-tauri/target/release/bundle/macos/${AI_CHATS_APP_NAME}.app"
-    "$ROOT_DIR/src-tauri/target/debug/bundle/macos/${AI_CHATS_APP_NAME}.app"
-    "$ROOT_DIR/src-tauri/target/release/${AI_CHATS_APP_NAME}.app"
-    "/Applications/${AI_CHATS_APP_NAME}.app"
-  )
-
-  # Also match binary name without spaces if present
-  candidates+=(
     "$ROOT_DIR/src-tauri/target/release/bundle/macos/AI Chats.app"
+    "$ROOT_DIR/target/debug/bundle/macos/${AI_CHATS_APP_NAME}.app"
+    "$ROOT_DIR/src-tauri/target/debug/bundle/macos/${AI_CHATS_APP_NAME}.app"
+    "$ROOT_DIR/target/release/ai-chats"
     "$ROOT_DIR/src-tauri/target/release/ai-chats"
-    "$ROOT_DIR/src-tauri/target/release/app"
+    "/Applications/${AI_CHATS_APP_NAME}.app"
   )
 
   for candidate in "${candidates[@]}"; do

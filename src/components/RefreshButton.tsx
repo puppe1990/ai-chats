@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { useRouter, useRouterState } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 
 function isRouteRefreshing(state: {
   isLoading: boolean
@@ -12,6 +13,7 @@ function isRouteRefreshing(state: {
 }
 
 export function RefreshButton() {
+  const { t } = useTranslation()
   const router = useRouter()
   const [isManualRefresh, setIsManualRefresh] = useState(false)
   const isRouterRefreshing = useRouterState({
@@ -31,7 +33,7 @@ export function RefreshButton() {
     }
   }
 
-  const label = isRefreshing ? 'Atualizando...' : 'Atualizar dados'
+  const label = isRefreshing ? t('nav.refreshingAria') : t('nav.refreshAria')
 
   return (
     <button
@@ -46,7 +48,7 @@ export function RefreshButton() {
         className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
         aria-hidden
       />
-      <span>{isRefreshing ? 'Atualizando' : 'Atualizar'}</span>
+      <span>{isRefreshing ? t('nav.refreshing') : t('nav.refresh')}</span>
     </button>
   )
 }

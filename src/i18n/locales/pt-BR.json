@@ -1,0 +1,114 @@
+{
+  "app": {
+    "name": "AI Chats",
+    "tagline": "Cursor, Grok, Codex, OpenCode & Claude Code — ordenados por mais recentes",
+    "loadingProviders": "Lendo sessões do Cursor, Grok, Codex, OpenCode e Claude Code"
+  },
+  "nav": {
+    "loading": "Carregando…",
+    "refresh": "Atualizar",
+    "refreshing": "Atualizando",
+    "refreshAria": "Atualizar dados",
+    "refreshingAria": "Atualizando..."
+  },
+  "theme": {
+    "light": "☀️ Claro",
+    "dark": "🌙 Escuro",
+    "toggleAria": "Tema: {{mode}}. Clique para alternar.",
+    "modeLight": "claro",
+    "modeDark": "escuro"
+  },
+  "language": {
+    "label": "Idioma",
+    "en": "EN",
+    "ptBR": "PT",
+    "switchToEn": "Switch to English",
+    "switchToPtBR": "Mudar para português"
+  },
+  "home": {
+    "loadingTitle": "Carregando chats...",
+    "title": "AI Chats"
+  },
+  "chatList": {
+    "searchPlaceholder": "Buscar por título, pasta, provider ou modelo...",
+    "searchAria": "Buscar chats",
+    "clear": "Limpar",
+    "viewModeAria": "Modo de visualização",
+    "listView": "Lista",
+    "listViewAria": "Visualização em lista",
+    "gridView": "Grade",
+    "gridViewAria": "Visualização em grade",
+    "reorderHint": "Arraste pelo ícone de alça para reordenar os chats. A ordem fica salva neste navegador.",
+    "provider": "Provider",
+    "all": "Todos ({{count}})",
+    "favorites": "Favoritos ({{count}})",
+    "sourceCount": "{{label}} ({{count}})",
+    "results": "{{count}} resultado",
+    "results_other": "{{count}} resultados",
+    "resultsFor": " para “{{query}}”",
+    "resultsFavorites": " nos favoritos",
+    "resultsIn": " em {{source}}",
+    "emptyFavorites": "Nenhum favorito ainda. Toque em Favoritar em um chat.",
+    "emptyFiltered": "Nenhum chat corresponde aos filtros.",
+    "empty": "Nenhum chat encontrado.",
+    "updatingList": "Atualizando lista…",
+    "loadingAria": "Carregando chats"
+  },
+  "chatItem": {
+    "favorite": "Favorito",
+    "favoritar": "Favoritar",
+    "addFavorite": "Adicionar aos favoritos",
+    "removeFavorite": "Remover dos favoritos",
+    "copyId": "Copiar ID",
+    "copyAll": "Copiar tudo",
+    "copied": "Copiado!",
+    "opening": "Abrindo…",
+    "msgs": "{{count}} msgs",
+    "reorderAria": "Reordenar chat {{title}}"
+  },
+  "export": {
+    "exportMd": "Exportar .md",
+    "exporting": "Exportando...",
+    "copyMd": "Copiar MD",
+    "copying": "Copiando...",
+    "copied": "Copiado!",
+    "copyError": "Erro ao copiar"
+  },
+  "pagination": {
+    "navAria": "Paginação de chats",
+    "showing": "Mostrando {{start}}–{{end}} de {{total}}",
+    "previous": "Anterior",
+    "previousAria": "Página anterior",
+    "next": "Próxima",
+    "nextAria": "Próxima página",
+    "pageOf": "Página {{page}} de {{total}}"
+  },
+  "chatDetail": {
+    "loadingTitle": "Abrindo chat...",
+    "loadingDescription": "Carregando mensagens da sessão",
+    "loadingAria": "Carregando chat",
+    "notFound": "Chat não encontrado.",
+    "back": "← Voltar",
+    "allChats": "← Todos os chats",
+    "messages": "{{count}} mensagens"
+  },
+  "messages": {
+    "empty": "Nenhuma mensagem encontrada para este chat.",
+    "jumpToBottom": "Ir para o final",
+    "roleUser": "Você",
+    "roleAssistant": "Assistente",
+    "roleSystem": "Sistema",
+    "roleTool": "Ferramenta"
+  },
+  "footer": {
+    "rights": "© {{year}} Your name here. All rights reserved.",
+    "builtWith": "Built with TanStack Start",
+    "followX": "Follow TanStack on X",
+    "github": "Go to TanStack GitHub"
+  },
+  "about": {
+    "kicker": "Sobre",
+    "title": "Um starter pequeno com espaço para crescer.",
+    "body": "TanStack Start oferece rotas type-safe, server functions e defaults modernos de SSR. Use como base limpa e adicione suas rotas, estilos e extras."
+  }
+}

@@ -4,8 +4,9 @@
 //! The webview loads the built SPA from `frontendDist` (no Node backend).
 
 use ai_chats_core::{
-    get_chat_detail as core_detail, get_chats as core_chats, ChatDetail, ChatListQuery,
-    ChatListResponse, DataPaths,
+    get_chat_detail as core_detail, get_chats as core_chats, get_skill as core_get_skill,
+    list_skills as core_list_skills, save_skill as core_save_skill, ChatDetail, ChatListQuery,
+    ChatListResponse, DataPaths, SkillDetail, SkillPaths, SkillSummary,
 };
 
 #[tauri::command]
@@ -16,6 +17,21 @@ fn get_chats(query: ChatListQuery) -> Result<ChatListResponse, String> {
 #[tauri::command]
 fn get_chat_detail(chat_id: String) -> Result<Option<ChatDetail>, String> {
     Ok(core_detail(&chat_id, &DataPaths::from_env()))
+}
+
+#[tauri::command]
+fn get_skills() -> Result<Vec<SkillSummary>, String> {
+    Ok(core_list_skills(&SkillPaths::from_env()))
+}
+
+#[tauri::command]
+fn get_skill(skill_id: String) -> Result<Option<SkillDetail>, String> {
+    core_get_skill(&skill_id, &SkillPaths::from_env())
+}
+
+#[tauri::command]
+fn save_skill(skill_id: String, content: String) -> Result<SkillDetail, String> {
+    core_save_skill(&skill_id, &content, &SkillPaths::from_env())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -29,7 +45,13 @@ pub fn run() {
             )?;
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_chats, get_chat_detail])
+        .invoke_handler(tauri::generate_handler![
+            get_chats,
+            get_chat_detail,
+            get_skills,
+            get_skill,
+            save_skill
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

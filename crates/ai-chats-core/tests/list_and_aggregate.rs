@@ -120,11 +120,7 @@ fn favorites_only_and_favorite_count() {
         ChatListQuery {
             page: 1,
             favorites_only: Some(true),
-            favorite_ids: Some(vec![
-                "grok:1".into(),
-                "grok:2".into(),
-                "grok:99".into(),
-            ]),
+            favorite_ids: Some(vec!["grok:1".into(), "grok:2".into(), "grok:99".into()]),
             ..Default::default()
         },
     );
@@ -132,7 +128,11 @@ fn favorites_only_and_favorite_count() {
     assert_eq!(result.favorite_count, 2);
     assert_eq!(result.total_items, 2);
     assert_eq!(
-        result.items.iter().map(|c| c.id.as_str()).collect::<Vec<_>>(),
+        result
+            .items
+            .iter()
+            .map(|c| c.id.as_str())
+            .collect::<Vec<_>>(),
         vec!["grok:1", "grok:2"]
     );
     assert_eq!(result.total_chats, 25);

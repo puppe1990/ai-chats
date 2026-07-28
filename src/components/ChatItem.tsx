@@ -56,7 +56,7 @@ function ChatActions({
 
   return (
     <div
-      className="border-t border-zinc-100 px-4 py-2.5 dark:border-zinc-800 flex items-center gap-1 flex-wrap"
+      className="flex flex-wrap items-center gap-1 border-t border-zinc-100 px-4 py-2.5 dark:border-zinc-700"
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
     >
@@ -75,7 +75,7 @@ function ChatActions({
           className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition ${
             isFavorite
               ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-950/70'
-              : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
+              : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:text-white'
           }`}
         >
           <Star
@@ -123,7 +123,7 @@ export function ChatItem({
   const { t } = useTranslation()
   const { source, sessionId } = toChatRouteParams(chat.id)
   const cardClass =
-    'group relative rounded-lg border border-zinc-200 bg-white/80 shadow-sm transition hover:border-zinc-300 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/50 dark:shadow-none dark:hover:border-zinc-700 dark:hover:bg-zinc-900 has-[[data-status=pending]]:border-[var(--lagoon)] has-[[data-status=pending]]:ring-2 has-[[data-status=pending]]:ring-[color-mix(in_oklab,var(--lagoon)_45%,transparent)] has-[[data-status=pending]]:bg-[color-mix(in_oklab,var(--lagoon)_8%,white)] dark:has-[[data-status=pending]]:bg-[color-mix(in_oklab,var(--lagoon)_12%,#0f1a1e)]'
+    'group relative rounded-lg border border-zinc-200 bg-white/80 shadow-sm transition hover:border-zinc-300 hover:bg-white dark:border-zinc-600 dark:bg-zinc-900 dark:shadow-none dark:hover:border-zinc-500 dark:hover:bg-zinc-800 has-[[data-status=pending]]:border-[var(--lagoon)] has-[[data-status=pending]]:ring-2 has-[[data-status=pending]]:ring-[color-mix(in_oklab,var(--lagoon)_45%,transparent)] has-[[data-status=pending]]:bg-[color-mix(in_oklab,var(--lagoon)_8%,white)] dark:has-[[data-status=pending]]:bg-[color-mix(in_oklab,var(--lagoon)_14%,#152228)]'
 
   const linkClass =
     'chat-item-link relative flex flex-1 no-underline outline-none data-[status=pending]:cursor-wait'
@@ -143,7 +143,7 @@ export function ChatItem({
       type="button"
       draggable
       aria-label={t('chatItem.reorderAria', { title: chat.title })}
-      className="mt-0.5 inline-flex shrink-0 cursor-grab rounded-md p-1 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600 active:cursor-grabbing dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+      className="mt-0.5 inline-flex shrink-0 cursor-grab rounded-md p-1 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700 active:cursor-grabbing dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
       onDragStart={drag.onDragStart}
       onDragEnd={drag.onDragEnd}
       onMouseDown={(event) => event.stopPropagation()}
@@ -182,12 +182,16 @@ export function ChatItem({
                 </div>
                 <RelativeTime iso={chat.updatedAt} />
               </div>
-              <p className="font-medium text-zinc-900 line-clamp-2 dark:text-zinc-100">
+              <p className="font-medium text-zinc-900 line-clamp-2 dark:text-zinc-50">
                 {chat.title}
               </p>
-              {chat.cwd && <p className="text-xs text-zinc-500 truncate">{chat.cwd}</p>}
+              {chat.cwd && (
+                <p className="text-xs text-zinc-600 truncate dark:text-zinc-300">
+                  {chat.cwd}
+                </p>
+              )}
               {chat.messageCount != null && (
-                <span className="mt-auto text-xs text-zinc-400 tabular-nums dark:text-zinc-600">
+                <span className="mt-auto text-xs text-zinc-500 tabular-nums dark:text-zinc-300">
                   {t('chatItem.msgs', { count: chat.messageCount })}
                 </span>
               )}
@@ -223,15 +227,17 @@ export function ChatItem({
                 {favoriteBadge}
                 <RelativeTime iso={chat.updatedAt} />
               </div>
-              <p className="font-medium text-zinc-900 truncate dark:text-zinc-100">
+              <p className="font-medium text-zinc-900 truncate dark:text-zinc-50">
                 {chat.title}
               </p>
               {chat.cwd && (
-                <p className="text-xs text-zinc-500 truncate mt-0.5">{chat.cwd}</p>
+                <p className="mt-0.5 truncate text-xs text-zinc-600 dark:text-zinc-300">
+                  {chat.cwd}
+                </p>
               )}
             </div>
             {chat.messageCount != null && (
-              <span className="text-xs text-zinc-400 tabular-nums dark:text-zinc-600">
+              <span className="text-xs text-zinc-500 tabular-nums dark:text-zinc-300">
                 {t('chatItem.msgs', { count: chat.messageCount })}
               </span>
             )}

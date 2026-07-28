@@ -39,12 +39,11 @@ pub fn fetch_opencode_messages(db_path: &Path, session_id: &str) -> Vec<ChatMess
         Err(_) => return Vec::new(),
     };
 
-    let mut parts_stmt = match db.prepare(
-        "SELECT data FROM part WHERE message_id = ? ORDER BY time_created ASC",
-    ) {
-        Ok(s) => s,
-        Err(_) => return Vec::new(),
-    };
+    let mut parts_stmt =
+        match db.prepare("SELECT data FROM part WHERE message_id = ? ORDER BY time_created ASC") {
+            Ok(s) => s,
+            Err(_) => return Vec::new(),
+        };
 
     let mut result = Vec::new();
 

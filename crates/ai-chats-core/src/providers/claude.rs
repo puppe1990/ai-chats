@@ -120,10 +120,7 @@ fn find_session_files(projects_dir: &Path) -> Vec<PathBuf> {
 }
 
 /// Extract title from the first user message in a Claude session file.
-pub fn extract_claude_title_from_session(
-    session_path: &Path,
-    max_lines: usize,
-) -> Option<String> {
+pub fn extract_claude_title_from_session(session_path: &Path, max_lines: usize) -> Option<String> {
     let content = fs::read_to_string(session_path).ok()?;
     let mut line_count = 0usize;
     for line in content.lines() {
@@ -191,10 +188,7 @@ fn scan_session_metadata(session_path: &Path) -> SessionMeta {
             meta.message_count += 1;
         }
         if row_type == Some("assistant") {
-            if let Some(model) = row
-                .pointer("/message/model")
-                .and_then(|v| v.as_str())
-            {
+            if let Some(model) = row.pointer("/message/model").and_then(|v| v.as_str()) {
                 meta.model = Some(model.to_string());
             }
         }

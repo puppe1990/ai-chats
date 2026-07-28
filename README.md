@@ -14,7 +14,8 @@ Built with [TanStack Start](https://tanstack.com/start), React 19, Tailwind CSS,
 - **Source filters** — quick chips for Cursor, Grok, Codex, OpenCode, Claude
 - **Chat detail view** — click a session to read user/assistant messages
 - **Light & dark mode** — theme toggle in the header
-- **Read-only** — no writes to agent data; safe to run locally
+- **Chat data is read-only** — never mutates Cursor/Grok/Codex/OpenCode/Claude session stores
+- **Skills tab** — list/edit agent `SKILL.md` files under common home skill folders (desktop)
 - **Desktop app** — standalone native window via Tauri (Rust data layer; no Node at runtime)
 
 ## Supported data sources

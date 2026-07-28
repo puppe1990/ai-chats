@@ -245,7 +245,10 @@ fn count_sources(chats: &[ChatSession]) -> SourceCounts {
     counts
 }
 
-pub fn build_chat_list_response(chats: Vec<ChatSession>, raw_query: ChatListQuery) -> ChatListResponse {
+pub fn build_chat_list_response(
+    chats: Vec<ChatSession>,
+    raw_query: ChatListQuery,
+) -> ChatListResponse {
     let query = normalize_chat_list_query(&raw_query);
 
     let counts = count_sources(&chats);

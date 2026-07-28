@@ -24,6 +24,32 @@ export default function Header() {
             </Link>
           </h2>
 
+          <div className="flex items-center gap-1 sm:gap-1.5">
+            <Link
+              to="/"
+              className="rounded-full px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)] [&.active]:text-[var(--sea-ink)]"
+              activeOptions={{ exact: true }}
+              activeProps={{
+                className:
+                  'rounded-full bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline shadow-[0_4px_14px_rgba(30,90,72,0.08)] border border-[var(--chip-line)]',
+              }}
+              aria-label={t('nav.chatsAria')}
+            >
+              {t('nav.chats')}
+            </Link>
+            <Link
+              to="/skills"
+              className="rounded-full px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+              activeProps={{
+                className:
+                  'rounded-full bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline shadow-[0_4px_14px_rgba(30,90,72,0.08)] border border-[var(--chip-line)]',
+              }}
+              aria-label={t('nav.skillsAria')}
+            >
+              {t('nav.skills')}
+            </Link>
+          </div>
+
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
             <RefreshButton />
             <LanguageSwitcher />

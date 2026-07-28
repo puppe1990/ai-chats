@@ -20,9 +20,7 @@ fn parses_project_session_jsonl_into_chat_session() {
     assert_eq!(s.model.as_deref(), Some("claude-sonnet-4-6"));
     let storage = s.storage_path.as_deref().expect("storage_path");
     assert!(
-        storage.ends_with(
-            "projects/-test-project/7a176d05-ee9d-42f2-81ee-72b9ac9c800c.jsonl"
-        ),
+        storage.ends_with("projects/-test-project/7a176d05-ee9d-42f2-81ee-72b9ac9c800c.jsonl"),
         "storage_path was {storage}"
     );
     assert!(!s.updated_at.is_empty());

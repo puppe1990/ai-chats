@@ -15,7 +15,7 @@ export function ChatListSkeleton({ count = 8 }: { count?: number }) {
         {Array.from({ length: count }).map((_, i) => (
           <li
             key={i}
-            className="rounded-lg border border-zinc-200 bg-white/80 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/50"
+            className="rounded-lg border border-zinc-200 bg-white/80 px-4 py-3 dark:border-zinc-600 dark:bg-zinc-900"
           >
             <div className="flex items-start gap-4">
               <div className="flex-1 space-y-2">

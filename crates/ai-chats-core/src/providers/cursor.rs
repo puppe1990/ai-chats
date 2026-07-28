@@ -61,11 +61,17 @@ fn find_store_dbs(chats_dir: &Path) -> Vec<std::path::PathBuf> {
 }
 
 fn parse_store_db(db_path: &Path) -> Option<ChatSession> {
-    let chat_id = db_path.parent()?.file_name()?.to_string_lossy().into_owned();
+    let chat_id = db_path
+        .parent()?
+        .file_name()?
+        .to_string_lossy()
+        .into_owned();
 
     let db = open_readonly(db_path).ok()?;
     let value: String = db
-        .query_row("SELECT value FROM meta WHERE key = '0'", [], |row| row.get(0))
+        .query_row("SELECT value FROM meta WHERE key = '0'", [], |row| {
+            row.get(0)
+        })
         .ok()?;
 
     let bytes = hex_decode(&value)?;

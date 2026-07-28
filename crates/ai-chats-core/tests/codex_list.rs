@@ -38,8 +38,7 @@ fn includes_rollout_files_not_in_session_index() {
 
 #[test]
 fn missing_dir_returns_empty() {
-    let sessions =
-        fetch_codex_chats(std::path::Path::new("/nonexistent/codex-home")).expect("ok");
+    let sessions = fetch_codex_chats(std::path::Path::new("/nonexistent/codex-home")).expect("ok");
     assert!(sessions.is_empty());
 }
 

@@ -79,9 +79,7 @@ pub fn fetch_grok_chats(sessions_dir: &Path) -> Result<Vec<ChatSession>, std::io
             .or_else(|| data.created_at.clone())
             .unwrap_or_else(|| EPOCH_ISO.to_string());
 
-        let storage_path = path
-            .parent()
-            .map(|p| p.to_string_lossy().into_owned());
+        let storage_path = path.parent().map(|p| p.to_string_lossy().into_owned());
 
         sessions.push(ChatSession {
             id: format!("grok:{}", data.info.id),

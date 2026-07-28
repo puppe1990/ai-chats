@@ -9,7 +9,32 @@
     "refresh": "Atualizar",
     "refreshing": "Atualizando",
     "refreshAria": "Atualizar dados",
-    "refreshingAria": "Atualizando..."
+    "refreshingAria": "Atualizando...",
+    "skills": "Skills",
+    "skillsAria": "Skills do computador",
+    "chats": "Chats",
+    "chatsAria": "Lista de chats"
+  },
+  "skills": {
+    "title": "Skills",
+    "tagline": "Skills de agentes instaladas neste computador",
+    "searchPlaceholder": "Buscar por nome, descrição ou caminho…",
+    "searchAria": "Buscar skills",
+    "sourceFilterAria": "Filtrar por origem",
+    "all": "Todas ({{count}})",
+    "empty": "Nenhuma skill encontrada nas pastas usuais de agentes.",
+    "emptyFiltered": "Nenhuma skill corresponde aos filtros.",
+    "selectPrompt": "Selecione uma skill para ver e editar o SKILL.md.",
+    "editorLabel": "Conteúdo do SKILL.md",
+    "save": "Salvar",
+    "saving": "Salvando…",
+    "unsaved": "Alterações não salvas",
+    "saveError": "Não foi possível salvar a skill",
+    "loadError": "Não foi possível carregar a skill",
+    "notFound": "Skill não encontrada (id={{id}})",
+    "symlink": "symlink",
+    "loadingTitle": "Carregando skills…",
+    "loadingDescription": "Lendo pastas de skills deste computador"
   },
   "theme": {
     "light": "☀️ Claro",

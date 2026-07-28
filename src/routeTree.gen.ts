@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SkillsRouteImport } from './routes/skills'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatSourceSessionIdRouteImport } from './routes/chat.$source.$sessionId'
 
+const SkillsRoute = SkillsRouteImport.update({
+  id: '/skills',
+  path: '/skills',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -32,35 +38,46 @@ const ChatSourceSessionIdRoute = ChatSourceSessionIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/skills': typeof SkillsRoute
   '/chat/$source/$sessionId': typeof ChatSourceSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/skills': typeof SkillsRoute
   '/chat/$source/$sessionId': typeof ChatSourceSessionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/skills': typeof SkillsRoute
   '/chat/$source/$sessionId': typeof ChatSourceSessionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/chat/$source/$sessionId'
+  fullPaths: '/' | '/about' | '/skills' | '/chat/$source/$sessionId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/chat/$source/$sessionId'
-  id: '__root__' | '/' | '/about' | '/chat/$source/$sessionId'
+  to: '/' | '/about' | '/skills' | '/chat/$source/$sessionId'
+  id: '__root__' | '/' | '/about' | '/skills' | '/chat/$source/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  SkillsRoute: typeof SkillsRoute
   ChatSourceSessionIdRoute: typeof ChatSourceSessionIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/skills': {
+      id: '/skills'
+      path: '/skills'
+      fullPath: '/skills'
+      preLoaderRoute: typeof SkillsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  SkillsRoute: SkillsRoute,
   ChatSourceSessionIdRoute: ChatSourceSessionIdRoute,
 }
 export const routeTree = rootRouteImport

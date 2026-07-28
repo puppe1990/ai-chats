@@ -9,7 +9,32 @@
     "refresh": "Refresh",
     "refreshing": "Refreshing",
     "refreshAria": "Refresh data",
-    "refreshingAria": "Refreshing..."
+    "refreshingAria": "Refreshing...",
+    "skills": "Skills",
+    "skillsAria": "Computer skills",
+    "chats": "Chats",
+    "chatsAria": "Chat list"
+  },
+  "skills": {
+    "title": "Skills",
+    "tagline": "Installed agent skills on this computer",
+    "searchPlaceholder": "Search by name, description, or path…",
+    "searchAria": "Search skills",
+    "sourceFilterAria": "Filter by source",
+    "all": "All ({{count}})",
+    "empty": "No skills found in the usual agent skill folders.",
+    "emptyFiltered": "No skills match the filters.",
+    "selectPrompt": "Select a skill to view and edit its SKILL.md.",
+    "editorLabel": "SKILL.md content",
+    "save": "Save",
+    "saving": "Saving…",
+    "unsaved": "Unsaved changes",
+    "saveError": "Could not save skill",
+    "loadError": "Could not load skill",
+    "notFound": "Skill not found (id={{id}})",
+    "symlink": "symlink",
+    "loadingTitle": "Loading skills…",
+    "loadingDescription": "Reading skill folders from this computer"
   },
   "theme": {
     "light": "☀️ Light",

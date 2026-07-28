@@ -1,3 +1,73 @@
+# AI Chats — agent rules
+
+Dense rules for coding agents. Keep every line short and imperative.
+
+## Commands (one-shot)
+
+- Tests (TS): `npm test`
+- Tests (Rust core): `cargo test -p ai-chats-core`
+- Lint: `npm run lint`
+- Format: `npm run format` / `cargo fmt`
+- Routes: `npm run generate-routes` after adding/renaming `src/routes/*`
+- Desktop dev: `npm run tauri:dev` (needs Rust; skills FS APIs only work here)
+
+## Code style
+
+- Functions: 4–20 lines. Split if longer.
+- Files: under 500 lines (prefer 200–300). Split by responsibility.
+- One thing per function; one responsibility per module (SRP).
+- Names: specific and greppable. Avoid `data`, `handler`, `Manager`, `utils`.
+- Types: explicit on public TS/Rust surfaces. No `any`.
+- No duplication. Extract shared logic into a named module/function.
+- Early returns; max 2 levels of control-flow indentation.
+- Errors must include offending value and expected shape.
+
+## Comments
+
+- Keep WHY / provenance comments on refactor. Do not strip intent.
+- Write WHY, not WHAT. No `// increment i`.
+- Public APIs: short docstring + one usage example when non-obvious.
+- Reference issue IDs / SHAs when a line exists for a non-local reason.
+
+## Tests
+
+- Every new behavior gets a test. Bug fixes get a regression test.
+- Prefer fixtures under temp dirs / named fakes over deep mocks.
+- F.I.R.S.T.: fast, independent, repeatable, self-validating, timely.
+- TDD for new behavior when practical (red → green → refactor).
+
+## Structure (this repo)
+
+```
+crates/ai-chats-core/   # Rust: chats + skills I/O (desktop data layer)
+src-tauri/              # Tauri commands → core
+src/lib/                # pure TS helpers + desktop-api invoke wrappers
+src/components/         # UI units (+ *.test.tsx)
+src/routes/             # TanStack file routes
+docs/superpowers/       # specs + plans
+```
+
+- Chats: `providers/*`, `list`, `messages/*` — **read-only** agent session data.
+- Skills: `skills/{list,io,path_guard,id,frontmatter}` — **read/write** `SKILL.md` under home skill roots only (path confined).
+- Frontend never touches FS directly; use `src/lib/desktop-api.ts` invoke helpers.
+- Mirror tests: Rust `crates/ai-chats-core/tests/*`, TS `src/**/*.test.ts(x)`.
+
+## Dependencies / config
+
+- Inject `DataPaths` / `SkillPaths` in core (not hard-coded HOME inside list/io).
+- Env overrides: `GROK_HOME`, `CLAUDE_HOME`, `CODEX_HOME`, `CURSOR_HOME`.
+- Do not add Node runtime FS for desktop path; Tauri + Rust only.
+
+## Formatting
+
+- `prettier` (TS) via `npm run format`; `cargo fmt` for Rust. No style debate.
+
+## Defensive (project-specific)
+
+- Path confinement for skill save (must stay under skill roots).
+- Provider aggregate timeout already in chat aggregate — do not hang UI forever.
+- Graceful empty list when a skill/chat root is missing (not a hard crash).
+
 <!-- intent-skills:start -->
 
 # TanStack Intent - before editing files, run the matching guidance command.

@@ -3,6 +3,7 @@ pub mod list;
 pub mod messages;
 pub mod paths;
 pub mod providers;
+pub mod skills;
 mod sqlite_util;
 pub mod text;
 pub mod types;
@@ -10,6 +11,10 @@ pub mod types;
 pub use aggregate::{aggregate_chats, PROVIDER_TIMEOUT_MS};
 pub use list::{build_chat_list_response, CHAT_PAGE_SIZE};
 pub use paths::DataPaths;
+pub use skills::{
+    encode_skill_id, get_skill, list_skills, save_skill, SkillDetail, SkillPaths, SkillSource,
+    SkillSummary,
+};
 pub use types::*;
 
 /// Aggregate all providers and build a filtered/paginated list response.

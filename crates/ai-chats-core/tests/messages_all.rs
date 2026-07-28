@@ -19,11 +19,7 @@ fn dummy_paths() -> DataPaths {
     }
 }
 
-fn session(
-    id: &str,
-    source: ChatSource,
-    storage_path: Option<impl Into<String>>,
-) -> ChatSession {
+fn session(id: &str, source: ChatSource, storage_path: Option<impl Into<String>>) -> ChatSession {
     ChatSession {
         id: id.to_string(),
         source,
@@ -39,9 +35,8 @@ fn session(
 
 #[test]
 fn claude_parses_user_assistant_and_tool_messages() {
-    let path = fixtures().join(
-        "claude/projects/-test-project/7a176d05-ee9d-42f2-81ee-72b9ac9c800c.jsonl",
-    );
+    let path =
+        fixtures().join("claude/projects/-test-project/7a176d05-ee9d-42f2-81ee-72b9ac9c800c.jsonl");
     let messages = fetch_claude_messages(&path);
     assert_eq!(messages.len(), 3);
 
@@ -164,8 +159,8 @@ fn opencode_unknown_session_returns_empty() {
 
 #[test]
 fn fetch_chat_detail_returns_messages_when_id_matches() {
-    let path = fixtures()
-        .join("claude/projects/-test-project/7a176d05-ee9d-42f2-81ee-72b9ac9c800c.jsonl");
+    let path =
+        fixtures().join("claude/projects/-test-project/7a176d05-ee9d-42f2-81ee-72b9ac9c800c.jsonl");
     let chat_id = "claude:7a176d05-ee9d-42f2-81ee-72b9ac9c800c";
     let s = session(chat_id, ChatSource::Claude, Some(path.to_string_lossy()));
     let detail = fetch_chat_detail(chat_id, &s, &dummy_paths()).expect("Some");
@@ -176,8 +171,8 @@ fn fetch_chat_detail_returns_messages_when_id_matches() {
 
 #[test]
 fn fetch_chat_detail_none_on_id_mismatch() {
-    let path = fixtures()
-        .join("claude/projects/-test-project/7a176d05-ee9d-42f2-81ee-72b9ac9c800c.jsonl");
+    let path =
+        fixtures().join("claude/projects/-test-project/7a176d05-ee9d-42f2-81ee-72b9ac9c800c.jsonl");
     let s = session(
         "claude:7a176d05-ee9d-42f2-81ee-72b9ac9c800c",
         ChatSource::Claude,

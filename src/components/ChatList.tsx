@@ -32,12 +32,12 @@ type ViewMode = 'list' | 'grid'
 
 const CHIP_ACTIVE = 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
 const CHIP_INACTIVE =
-  'bg-white text-zinc-600 border border-zinc-200 hover:text-zinc-900 hover:border-zinc-300 dark:bg-zinc-800 dark:text-zinc-400 dark:border-transparent dark:hover:text-zinc-200'
+  'bg-white text-zinc-700 border border-zinc-200 hover:text-zinc-900 hover:border-zinc-300 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-600 dark:hover:text-white dark:hover:border-zinc-500'
 
 const VIEW_TOGGLE_ACTIVE =
   'bg-zinc-900 text-white shadow-sm dark:bg-zinc-100 dark:text-zinc-900'
 const VIEW_TOGGLE_INACTIVE =
-  'text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
+  'text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white'
 
 function readStoredViewMode(): ViewMode {
   if (typeof window === 'undefined') return 'list'
@@ -163,7 +163,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
             }}
             placeholder={t('chatList.searchPlaceholder')}
             aria-label={t('chatList.searchAria')}
-            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 shadow-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300 dark:border-zinc-800 dark:bg-zinc-900/80 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-zinc-600 dark:focus:ring-zinc-600"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 shadow-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-50 dark:placeholder:text-zinc-400 dark:focus:border-zinc-400 dark:focus:ring-zinc-500"
           />
           {query.trim().length > 0 && (
             <button
@@ -172,7 +172,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
                 setQuery('')
                 setPage(1)
               }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-300 dark:hover:text-zinc-100"
             >
               {t('chatList.clear')}
             </button>
@@ -180,7 +180,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
         </div>
 
         <div
-          className="inline-flex shrink-0 items-center gap-1 self-start rounded-lg border border-zinc-200 bg-white p-1 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80"
+          className="inline-flex shrink-0 items-center gap-1 self-start rounded-lg border border-zinc-200 bg-white p-1 shadow-sm dark:border-zinc-600 dark:bg-zinc-900"
           role="group"
           aria-label={t('chatList.viewModeAria')}
         >
@@ -207,10 +207,12 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
         </div>
       </div>
 
-      <p className="mb-4 text-xs text-zinc-500">{t('chatList.reorderHint')}</p>
+      <p className="mb-4 text-xs text-zinc-600 dark:text-zinc-300">
+        {t('chatList.reorderHint')}
+      </p>
 
       <div className="mb-2">
-        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
+        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-600 dark:text-zinc-300">
           {t('chatList.provider')}
         </p>
         <div className="flex flex-wrap gap-2">
@@ -255,7 +257,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
       </div>
 
       {(hasActiveSearch || hasActiveFilter) && (
-        <p className="mb-4 text-xs text-zinc-500">
+        <p className="mb-4 text-xs text-zinc-600 dark:text-zinc-300">
           {t('chatList.results', { count: visibleTotalItems })}
           {hasActiveSearch &&
             t('chatList.resultsFor', { query: debouncedQuery.trim() })}
@@ -266,7 +268,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
       )}
 
       {visibleTotalItems === 0 ? (
-        <p className="py-12 text-center text-zinc-500">
+        <p className="py-12 text-center text-zinc-600 dark:text-zinc-300">
           {favoritesOnly && favoriteCount === 0
             ? t('chatList.emptyFavorites')
             : hasActiveSearch || hasActiveFilter

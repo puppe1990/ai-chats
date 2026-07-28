@@ -29,8 +29,7 @@ fn rollout_uuid_re() -> &'static Regex {
 fn rollout_ts_re() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
     RE.get_or_init(|| {
-        Regex::new(r"(?i)rollout-(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2})-")
-            .expect("rollout ts regex")
+        Regex::new(r"(?i)rollout-(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2})-").expect("rollout ts regex")
     })
 }
 
@@ -98,10 +97,7 @@ fn find_rollout_files(codex_home: &Path) -> Vec<PathBuf> {
 }
 
 /// Extract title from the first user message in a Codex rollout file.
-pub fn extract_codex_title_from_rollout(
-    file_path: &Path,
-    max_lines: usize,
-) -> Option<String> {
+pub fn extract_codex_title_from_rollout(file_path: &Path, max_lines: usize) -> Option<String> {
     let content = fs::read_to_string(file_path).ok()?;
     for line in content.lines().take(max_lines) {
         if line.trim().is_empty() {

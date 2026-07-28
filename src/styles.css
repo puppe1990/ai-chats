@@ -30,49 +30,50 @@
   --hero-b: rgba(47, 106, 74, 0.2);
 }
 
+/* Dark theme: higher contrast text, slightly lifted surfaces for long reading. */
 :root[data-theme='dark'] {
-  --sea-ink: #d7ece8;
-  --sea-ink-soft: #afcdc8;
-  --lagoon: #60d7cf;
-  --lagoon-deep: #8de5db;
-  --palm: #6ec89a;
-  --sand: #0f1a1e;
-  --foam: #101d22;
-  --surface: rgba(16, 30, 34, 0.8);
-  --surface-strong: rgba(15, 27, 31, 0.92);
-  --line: rgba(141, 229, 219, 0.18);
-  --inset-glint: rgba(194, 247, 238, 0.14);
-  --kicker: #b8efe5;
-  --bg-base: #0a1418;
-  --header-bg: rgba(10, 20, 24, 0.8);
-  --chip-bg: rgba(13, 28, 32, 0.9);
-  --chip-line: rgba(141, 229, 219, 0.24);
-  --link-bg-hover: rgba(24, 44, 49, 0.8);
-  --hero-a: rgba(96, 215, 207, 0.18);
-  --hero-b: rgba(110, 200, 154, 0.12);
+  --sea-ink: #eef7f4;
+  --sea-ink-soft: #c5ddd8;
+  --lagoon: #6edfd7;
+  --lagoon-deep: #9aefe6;
+  --palm: #7fd4a8;
+  --sand: #121c21;
+  --foam: #152228;
+  --surface: rgba(24, 38, 43, 0.94);
+  --surface-strong: rgba(28, 42, 48, 0.97);
+  --line: rgba(170, 230, 220, 0.22);
+  --inset-glint: rgba(200, 248, 240, 0.1);
+  --kicker: #c5f3ea;
+  --bg-base: #0e171c;
+  --header-bg: rgba(14, 23, 28, 0.9);
+  --chip-bg: rgba(28, 42, 48, 0.95);
+  --chip-line: rgba(170, 230, 220, 0.28);
+  --link-bg-hover: rgba(36, 54, 60, 0.95);
+  --hero-a: rgba(96, 215, 207, 0.12);
+  --hero-b: rgba(110, 200, 154, 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --sea-ink: #d7ece8;
-    --sea-ink-soft: #afcdc8;
-    --lagoon: #60d7cf;
-    --lagoon-deep: #8de5db;
-    --palm: #6ec89a;
-    --sand: #0f1a1e;
-    --foam: #101d22;
-    --surface: rgba(16, 30, 34, 0.8);
-    --surface-strong: rgba(15, 27, 31, 0.92);
-    --line: rgba(141, 229, 219, 0.18);
-    --inset-glint: rgba(194, 247, 238, 0.14);
-    --kicker: #b8efe5;
-    --bg-base: #0a1418;
-    --header-bg: rgba(10, 20, 24, 0.8);
-    --chip-bg: rgba(13, 28, 32, 0.9);
-    --chip-line: rgba(141, 229, 219, 0.24);
-    --link-bg-hover: rgba(24, 44, 49, 0.8);
-    --hero-a: rgba(96, 215, 207, 0.18);
-    --hero-b: rgba(110, 200, 154, 0.12);
+    --sea-ink: #eef7f4;
+    --sea-ink-soft: #c5ddd8;
+    --lagoon: #6edfd7;
+    --lagoon-deep: #9aefe6;
+    --palm: #7fd4a8;
+    --sand: #121c21;
+    --foam: #152228;
+    --surface: rgba(24, 38, 43, 0.94);
+    --surface-strong: rgba(28, 42, 48, 0.97);
+    --line: rgba(170, 230, 220, 0.22);
+    --inset-glint: rgba(200, 248, 240, 0.1);
+    --kicker: #c5f3ea;
+    --bg-base: #0e171c;
+    --header-bg: rgba(14, 23, 28, 0.9);
+    --chip-bg: rgba(28, 42, 48, 0.95);
+    --chip-line: rgba(170, 230, 220, 0.28);
+    --link-bg-hover: rgba(36, 54, 60, 0.95);
+    --hero-a: rgba(96, 215, 207, 0.12);
+    --hero-b: rgba(110, 200, 154, 0.08);
   }
 }
 
@@ -113,6 +114,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Dark: flatter base, less haze — content stays the focus. */
+html.dark body,
+html[data-theme='dark'] body {
+  background:
+    radial-gradient(900px 480px at -6% -8%, var(--hero-a), transparent 55%),
+    radial-gradient(860px 460px at 108% -6%, var(--hero-b), transparent 58%),
+    linear-gradient(180deg, var(--sand) 0%, var(--foam) 42%, var(--bg-base) 100%);
+}
+
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
   width: 10px;
@@ -144,6 +154,14 @@ body::before {
     radial-gradient(circle at 42% 82%, rgba(47, 106, 74, 0.14), transparent 36%);
 }
 
+html.dark body::before,
+html[data-theme='dark'] body::before {
+  opacity: 0.12;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(110, 223, 215, 0.14), transparent 36%),
+    radial-gradient(circle at 80% 20%, rgba(110, 200, 154, 0.1), transparent 40%);
+}
+
 body::after {
   content: '';
   position: fixed;
@@ -158,6 +176,14 @@ body::after {
   mask-image: radial-gradient(circle at 50% 30%, black, transparent 78%);
 }
 
+html.dark body::after,
+html[data-theme='dark'] body::after {
+  opacity: 0.05;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
 a {
   color: var(--lagoon-deep);
   text-decoration-color: rgba(50, 143, 151, 0.4);
@@ -167,6 +193,11 @@ a {
 
 a:hover {
   color: #246f76;
+}
+
+html.dark a:hover,
+html[data-theme='dark'] a:hover {
+  color: #b8f5ed;
 }
 
 code {
@@ -348,6 +379,24 @@ pre code {
 .demo-button-secondary {
   border-color: var(--line);
   background: color-mix(in oklab, var(--surface-strong) 74%, transparent);
+  color: var(--sea-ink);
+}
+
+html.dark .demo-button-secondary,
+html[data-theme='dark'] .demo-button-secondary {
+  background: color-mix(in oklab, var(--surface-strong) 90%, transparent);
+  color: var(--sea-ink);
+}
+
+html.dark code,
+html[data-theme='dark'] code {
+  background: color-mix(in oklab, var(--surface-strong) 88%, black 12%);
+  color: var(--sea-ink);
+}
+
+/* Shared muted text that stays readable on dark surfaces */
+html.dark .text-muted-readable,
+html[data-theme='dark'] .text-muted-readable {
   color: var(--sea-ink-soft);
 }
 

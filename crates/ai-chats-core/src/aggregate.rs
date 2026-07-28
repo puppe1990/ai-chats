@@ -59,8 +59,9 @@ pub fn aggregate_chats(paths: &DataPaths) -> Vec<ChatSession> {
         })
     });
     let cursor_rx = spawn_fetch("cursor", move || cursor::fetch_cursor_chats(&cursor_chats));
-    let opencode_rx =
-        spawn_fetch("opencode", move || opencode::fetch_opencode_chats(&opencode_db));
+    let opencode_rx = spawn_fetch("opencode", move || {
+        opencode::fetch_opencode_chats(&opencode_db)
+    });
     let claude_rx = spawn_fetch("claude", move || {
         claude::fetch_claude_chats(&claude_home).unwrap_or_else(|err| {
             eprintln!("[aggregate_chats] claude provider failed: {err}");
@@ -74,9 +75,8 @@ pub fn aggregate_chats(paths: &DataPaths) -> Vec<ChatSession> {
     let opencode = recv_fetch("opencode", opencode_rx);
     let claude = recv_fetch("claude", claude_rx);
 
-    let mut all = Vec::with_capacity(
-        grok.len() + codex.len() + cursor.len() + opencode.len() + claude.len(),
-    );
+    let mut all =
+        Vec::with_capacity(grok.len() + codex.len() + cursor.len() + opencode.len() + claude.len());
     all.extend(grok);
     all.extend(codex);
     all.extend(cursor);

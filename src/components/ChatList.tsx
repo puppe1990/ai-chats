@@ -24,7 +24,14 @@ import { ChatItem } from './ChatItem'
 import { LoadingSpinner } from './LoadingSpinner'
 import { Pagination } from './Pagination'
 
-const ALL_SOURCES: ChatSource[] = ['cursor', 'grok', 'codex', 'opencode', 'claude']
+const ALL_SOURCES: ChatSource[] = [
+  'cursor',
+  'grok',
+  'codex',
+  'opencode',
+  'claude',
+  'commandcode',
+]
 const VIEW_MODE_STORAGE_KEY = 'db-code-harness:chat-view-mode'
 const SEARCH_DEBOUNCE_MS = 300
 

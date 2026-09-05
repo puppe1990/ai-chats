@@ -4,6 +4,7 @@ import {
   countSkillsBySource,
   errorMessageFromUnknown,
   filterSkills,
+  removeSkillFromList,
   skillSourceLabel,
   type SkillDetail,
   type SkillSummary,
@@ -106,5 +107,12 @@ describe('errorMessageFromUnknown', () => {
     expect(errorMessageFromUnknown(new Error('boom'), 'fb')).toBe('boom')
     expect(errorMessageFromUnknown('plain', 'fb')).toBe('plain')
     expect(errorMessageFromUnknown(42, 'fb')).toBe('fb')
+  })
+})
+
+describe('removeSkillFromList', () => {
+  it('drops only the matching skill id', () => {
+    const next = removeSkillFromList(skills, '1')
+    expect(next.map((s) => s.id)).toEqual(['2', '3'])
   })
 })

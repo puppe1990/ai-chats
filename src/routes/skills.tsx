@@ -4,10 +4,11 @@ import { useTranslation } from 'react-i18next'
 import { SkillEditor } from '../components/SkillEditor'
 import { SkillList } from '../components/SkillList'
 import { PageLoadingState } from '../components/PageLoadingState'
-import { getSkill, getSkills, saveSkill } from '../lib/desktop-api'
+import { deleteSkill, getSkill, getSkills, saveSkill } from '../lib/desktop-api'
 import {
   applySavedSkillToList,
   errorMessageFromUnknown,
+  removeSkillFromList,
   type SkillDetail,
   type SkillSummary,
 } from '../lib/skills'
@@ -68,6 +69,14 @@ function SkillsPage() {
     return updated
   }, [])
 
+  const handleDelete = useCallback(async (id: string) => {
+    await deleteSkill(id)
+    setSkills((prev) => removeSkillFromList(prev, id))
+    setSelectedId(null)
+    setDetail(null)
+    setLoadError(null)
+  }, [])
+
   return (
     <main className="min-h-screen pb-24 text-[var(--sea-ink)]">
       <div className="mx-auto max-w-6xl px-6 py-10">
@@ -95,6 +104,7 @@ function SkillsPage() {
               loadError={loadError}
               detail={detail}
               onSave={handleSave}
+              onDelete={handleDelete}
             />
           </section>
         </div>
@@ -108,11 +118,13 @@ function SkillsEditorPanel({
   loadError,
   detail,
   onSave,
+  onDelete,
 }: {
   loading: boolean
   loadError: string | null
   detail: SkillDetail | null
   onSave: (id: string, content: string) => Promise<SkillDetail>
+  onDelete: (id: string) => Promise<void>
 }) {
   const { t } = useTranslation()
 
@@ -130,5 +142,5 @@ function SkillsEditorPanel({
       </p>
     )
   }
-  return <SkillEditor skill={detail} onSave={onSave} />
+  return <SkillEditor skill={detail} onSave={onSave} onDelete={onDelete} />
 }

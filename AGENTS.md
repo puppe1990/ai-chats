@@ -55,7 +55,7 @@ docs/superpowers/       # specs + plans
 ## Dependencies / config
 
 - Inject `DataPaths` / `SkillPaths` in core (not hard-coded HOME inside list/io).
-- Env overrides: `GROK_HOME`, `CLAUDE_HOME`, `CODEX_HOME`, `CURSOR_HOME`.
+- Env overrides: `GROK_HOME`, `CLAUDE_HOME`, `CODEX_HOME`, `CURSOR_HOME`, `COMMANDCODE_HOME`.
 - Do not add Node runtime FS for desktop path; Tauri + Rust only.
 
 ## Formatting

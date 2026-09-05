@@ -1,5 +1,6 @@
 pub mod claude;
 pub mod codex;
+pub mod commandcode;
 pub mod cursor;
 pub mod grok;
 pub mod opencode;
@@ -10,6 +11,7 @@ use std::path::Path;
 
 pub use claude::fetch_claude_messages;
 pub use codex::{fetch_codex_messages, find_codex_rollout_by_id};
+pub use commandcode::fetch_commandcode_messages;
 pub use cursor::fetch_cursor_messages;
 pub use grok::fetch_grok_messages;
 pub use opencode::fetch_opencode_messages;
@@ -26,6 +28,7 @@ fn source_str(source: ChatSource) -> &'static str {
         ChatSource::Codex => "codex",
         ChatSource::Opencode => "opencode",
         ChatSource::Claude => "claude",
+        ChatSource::CommandCode => "commandcode",
     }
 }
 
@@ -55,6 +58,7 @@ fn load_messages(session: &ChatSession, paths: &DataPaths) -> Vec<ChatMessage> {
             fetch_opencode_messages(storage, raw_id)
         }
         ChatSource::Claude => fetch_claude_messages(storage),
+        ChatSource::CommandCode => fetch_commandcode_messages(storage),
     }
 }
 

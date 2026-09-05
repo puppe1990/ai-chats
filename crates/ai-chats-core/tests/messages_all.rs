@@ -1,6 +1,6 @@
 use ai_chats_core::messages::{
-    fetch_chat_detail, fetch_claude_messages, fetch_codex_messages, fetch_cursor_messages,
-    fetch_grok_messages, fetch_opencode_messages, find_codex_rollout_by_id,
+    fetch_chat_detail, fetch_claude_messages, fetch_codex_messages, fetch_commandcode_messages,
+    fetch_cursor_messages, fetch_grok_messages, fetch_opencode_messages, find_codex_rollout_by_id,
 };
 use ai_chats_core::{ChatMessageRole, ChatSession, ChatSource, DataPaths};
 use std::path::{Path, PathBuf};
@@ -16,6 +16,7 @@ fn dummy_paths() -> DataPaths {
         codex_home: fixtures().join("codex"),
         opencode_data_dir: PathBuf::from("/tmp"),
         claude_home: PathBuf::from("/tmp"),
+        commandcode_home: PathBuf::from("/tmp"),
     }
 }
 
@@ -68,6 +69,52 @@ fn claude_parses_user_assistant_and_tool_messages() {
 #[test]
 fn claude_missing_file_returns_empty() {
     assert!(fetch_claude_messages(Path::new("/nonexistent.jsonl")).is_empty());
+}
+
+#[test]
+fn commandcode_parses_v3_user_assistant_and_tool_skipping_thinking() {
+    let path = fixtures()
+        .join("commandcode/projects/-test-project/7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e.jsonl");
+    let messages = fetch_commandcode_messages(&path);
+    assert_eq!(messages.len(), 3);
+    assert_eq!(messages[0].role, ChatMessageRole::User);
+    assert_eq!(messages[0].content, "Add Command Code chat history");
+    assert_eq!(
+        messages[0].timestamp.as_deref(),
+        Some("2026-09-03T16:11:02.685Z")
+    );
+    assert_eq!(messages[1].role, ChatMessageRole::Assistant);
+    assert_eq!(messages[1].content, "I'll parse the session JSONL files.");
+    assert_eq!(messages[2].role, ChatMessageRole::Tool);
+    assert!(
+        messages[2].content.contains("read_file"),
+        "tool content was: {}",
+        messages[2].content
+    );
+    assert!(!messages.iter().any(|m| m.content.contains("hidden")));
+}
+
+#[test]
+fn commandcode_parses_legacy_v2_roles_and_tool_calls() {
+    let path = fixtures()
+        .join("commandcode/projects/-test-project/8c9d0e1f-2a3b-4c5d-6e7f-8a9b0c1d2e3f.jsonl");
+    let messages = fetch_commandcode_messages(&path);
+    assert_eq!(messages.len(), 3);
+    assert_eq!(messages[0].role, ChatMessageRole::User);
+    assert_eq!(messages[0].content, "Legacy Command Code session");
+    assert_eq!(messages[1].role, ChatMessageRole::Assistant);
+    assert_eq!(messages[1].content, "Working on the legacy transcript.");
+    assert_eq!(messages[2].role, ChatMessageRole::Tool);
+    assert!(
+        messages[2].content.contains("shell_command"),
+        "tool content was: {}",
+        messages[2].content
+    );
+}
+
+#[test]
+fn commandcode_missing_file_returns_empty() {
+    assert!(fetch_commandcode_messages(Path::new("/nonexistent.jsonl")).is_empty());
 }
 
 #[test]
@@ -155,6 +202,22 @@ fn opencode_parses_messages_and_parts_for_session() {
 fn opencode_unknown_session_returns_empty() {
     let db = fixtures().join("opencode/opencode.db");
     assert!(fetch_opencode_messages(&db, "ses_missing").is_empty());
+}
+
+#[test]
+fn fetch_chat_detail_commandcode_loads_v3_transcript() {
+    let path = fixtures()
+        .join("commandcode/projects/-test-project/7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e.jsonl");
+    let chat_id = "commandcode:7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e";
+    let s = session(
+        chat_id,
+        ChatSource::CommandCode,
+        Some(path.to_string_lossy()),
+    );
+    let detail = fetch_chat_detail(chat_id, &s, &dummy_paths()).expect("Some");
+    assert_eq!(detail.session.source, ChatSource::CommandCode);
+    assert_eq!(detail.messages.len(), 3);
+    assert_eq!(detail.messages[0].content, "Add Command Code chat history");
 }
 
 #[test]

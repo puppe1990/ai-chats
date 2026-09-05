@@ -8,6 +8,7 @@ pub enum ChatSource {
     Codex,
     Opencode,
     Claude,
+    CommandCode,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -97,4 +98,5 @@ pub struct SourceCounts {
     pub codex: u32,
     pub opencode: u32,
     pub claude: u32,
+    pub commandcode: u32,
 }

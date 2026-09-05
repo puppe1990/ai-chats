@@ -23,6 +23,7 @@ const fixturePaths: DataPaths = {
   codexHome: path.join(FIXTURES, 'codex'),
   opencodeDataDir: path.join(FIXTURES, 'opencode'),
   claudeHome: path.join(FIXTURES, 'claude'),
+  commandcodeHome: path.join(FIXTURES, 'commandcode'),
 }
 
 describe('desktop data path (list + detail)', () => {
@@ -37,6 +38,7 @@ describe('desktop data path (list + detail)', () => {
     expect(sources.has('grok') || list.counts.grok > 0).toBe(true)
     expect(list.counts.claude).toBeGreaterThan(0)
     expect(list.counts.codex).toBeGreaterThan(0)
+    expect(list.counts.commandcode).toBeGreaterThan(0)
   })
 
   it('loadChatDetail returns messages for a Claude fixture session', async () => {
@@ -59,5 +61,20 @@ describe('desktop data path (list + detail)', () => {
   it('loadChatDetail returns null for unknown id', async () => {
     const detail = await loadChatDetail('claude:does-not-exist', fixturePaths)
     expect(detail).toBeNull()
+  })
+
+  it('loadChatDetail returns messages for a Command Code fixture session', async () => {
+    const list = await loadChatList(
+      { page: 1, source: 'commandcode', query: '' },
+      fixturePaths,
+    )
+    const session = list.items.find(
+      (item) => item.id === 'commandcode:7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e',
+    )
+    expect(session).toBeDefined()
+    const detail = await loadChatDetail(session!.id, fixturePaths)
+    expect(detail).not.toBeNull()
+    expect(detail!.session.source).toBe('commandcode')
+    expect(detail!.messages[0]?.content).toBe('Add Command Code chat history')
   })
 })

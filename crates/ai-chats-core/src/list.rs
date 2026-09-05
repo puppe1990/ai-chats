@@ -22,6 +22,7 @@ pub fn source_label(source: ChatSource) -> &'static str {
         ChatSource::Codex => "Codex",
         ChatSource::Opencode => "OpenCode",
         ChatSource::Claude => "Claude Code",
+        ChatSource::CommandCode => "Command Code",
     }
 }
 
@@ -32,6 +33,7 @@ pub fn source_key(source: ChatSource) -> &'static str {
         ChatSource::Codex => "codex",
         ChatSource::Opencode => "opencode",
         ChatSource::Claude => "claude",
+        ChatSource::CommandCode => "commandcode",
     }
 }
 
@@ -42,6 +44,7 @@ fn parse_source_filter(source: &str) -> Option<ChatSource> {
         "codex" => Some(ChatSource::Codex),
         "opencode" => Some(ChatSource::Opencode),
         "claude" => Some(ChatSource::Claude),
+        "commandcode" => Some(ChatSource::CommandCode),
         _ => None,
     }
 }
@@ -240,6 +243,7 @@ fn count_sources(chats: &[ChatSession]) -> SourceCounts {
             ChatSource::Codex => counts.codex += 1,
             ChatSource::Opencode => counts.opencode += 1,
             ChatSource::Claude => counts.claude += 1,
+            ChatSource::CommandCode => counts.commandcode += 1,
         }
     }
     counts

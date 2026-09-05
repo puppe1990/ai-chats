@@ -5,10 +5,12 @@ import {
   skillSourceLabel,
   type SkillDetail,
 } from '../lib/skills'
+import { SkillDeleteConfirmModal } from './SkillDeleteConfirmModal'
 
 type SkillEditorProps = {
   skill: SkillDetail | null
   onSave: (id: string, content: string) => Promise<SkillDetail>
+  onDelete: (id: string) => Promise<void>
 }
 
 /** Empty-state shell when nothing is selected. */
@@ -25,25 +27,30 @@ function SkillEditorEmpty() {
 
 /**
  * Editor for a loaded skill. Parent should remount with `key={skill.id}`
- * (or content revision) so draft state resets without effects.
+ * so draft state resets without effects.
  */
 function SkillEditorForm({
   skill,
   onSave,
+  onDelete,
 }: {
   skill: SkillDetail
   onSave: (id: string, content: string) => Promise<SkillDetail>
+  onDelete: (id: string) => Promise<void>
 }) {
   const { t } = useTranslation()
   const [content, setContent] = useState(skill.content)
   const [baseline, setBaseline] = useState(skill.content)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const dirty = content !== baseline
+  const busy = saving || deleting
 
   async function handleSave() {
-    if (!dirty || saving) return
+    if (!dirty || busy) return
     setSaving(true)
     setError(null)
     try {
@@ -54,6 +61,21 @@ function SkillEditorForm({
       setError(errorMessageFromUnknown(err, t('skills.saveError')))
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleConfirmDelete() {
+    if (busy) return
+    setDeleting(true)
+    setError(null)
+    try {
+      await onDelete(skill.id)
+      setConfirmOpen(false)
+    } catch (err) {
+      setError(errorMessageFromUnknown(err, t('skills.deleteError')))
+      setConfirmOpen(false)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -99,10 +121,18 @@ function SkillEditorForm({
         <button
           type="button"
           onClick={() => void handleSave()}
-          disabled={!dirty || saving}
+          disabled={!dirty || busy}
           className="rounded-full border border-[var(--chip-line)] bg-[var(--lagoon)] px-4 py-1.5 text-sm font-semibold text-[#0b2422] shadow-[0_8px_22px_rgba(30,90,72,0.12)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
         >
           {saving ? t('skills.saving') : t('skills.save')}
+        </button>
+        <button
+          type="button"
+          onClick={() => setConfirmOpen(true)}
+          disabled={busy}
+          className="rounded-full border border-red-300/60 bg-transparent px-4 py-1.5 text-sm font-semibold text-red-700 transition hover:-translate-y-0.5 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 dark:border-red-500/40 dark:text-red-300 dark:hover:bg-red-500/10"
+        >
+          {t('skills.delete')}
         </button>
         {dirty ? (
           <span className="text-xs font-medium text-amber-700 dark:text-amber-300">
@@ -119,15 +149,29 @@ function SkillEditorForm({
           {error}
         </p>
       ) : null}
+
+      <SkillDeleteConfirmModal
+        skillName={skill.name}
+        open={confirmOpen}
+        deleting={deleting}
+        onCancel={() => {
+          if (!deleting) setConfirmOpen(false)
+        }}
+        onConfirm={() => {
+          void handleConfirmDelete()
+        }}
+      />
     </div>
   )
 }
 
-export function SkillEditor({ skill, onSave }: SkillEditorProps) {
+export function SkillEditor({ skill, onSave, onDelete }: SkillEditorProps) {
   if (!skill) {
     return <SkillEditorEmpty />
   }
 
   // Remount when switching skills so draft state starts from the loaded content.
-  return <SkillEditorForm key={skill.id} skill={skill} onSave={onSave} />
+  return (
+    <SkillEditorForm key={skill.id} skill={skill} onSave={onSave} onDelete={onDelete} />
+  )
 }

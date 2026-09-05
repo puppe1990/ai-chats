@@ -5,7 +5,14 @@ import type { ChatSession, ChatSource } from './types'
 
 export const CHAT_PAGE_SIZE = 10
 
-const ALL_SOURCES: ChatSource[] = ['cursor', 'grok', 'codex', 'opencode', 'claude']
+const ALL_SOURCES: ChatSource[] = [
+  'cursor',
+  'grok',
+  'codex',
+  'opencode',
+  'claude',
+  'commandcode',
+]
 
 export interface ChatListQuery {
   page: number

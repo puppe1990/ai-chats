@@ -82,6 +82,14 @@ export function applySavedSkillToList(
   )
 }
 
+/** Remove a skill row after successful delete. */
+export function removeSkillFromList(
+  skills: SkillSummary[],
+  skillId: string,
+): SkillSummary[] {
+  return skills.filter((skill) => skill.id !== skillId)
+}
+
 export function skillSourceLabel(source: SkillSource): string {
   switch (source) {
     case 'grok':

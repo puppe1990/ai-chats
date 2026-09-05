@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import type { SkillDetail } from '../lib/skills'
 import { SkillEditor } from './SkillEditor'
@@ -18,7 +18,7 @@ const skill: SkillDetail = {
 
 describe('SkillEditor', () => {
   it('renders skill metadata and content', () => {
-    render(<SkillEditor skill={skill} onSave={vi.fn()} />)
+    render(<SkillEditor skill={skill} onSave={vi.fn()} onDelete={vi.fn()} />)
 
     expect(screen.getByText('firecrawl')).toBeInTheDocument()
     expect(screen.getByText('Agents')).toBeInTheDocument()
@@ -26,7 +26,7 @@ describe('SkillEditor', () => {
   })
 
   it('disables save until content changes', () => {
-    render(<SkillEditor skill={skill} onSave={vi.fn()} />)
+    render(<SkillEditor skill={skill} onSave={vi.fn()} onDelete={vi.fn()} />)
 
     const save = screen.getByRole('button', { name: /salvar/i })
     expect(save).toBeDisabled()
@@ -46,7 +46,7 @@ describe('SkillEditor', () => {
       description: 'Scrape the web',
     })
 
-    render(<SkillEditor skill={skill} onSave={onSave} />)
+    render(<SkillEditor skill={skill} onSave={onSave} onDelete={vi.fn()} />)
 
     fireEvent.change(screen.getByRole('textbox'), {
       target: { value: '---\nname: firecrawl\n---\n\nEdited\n' },
@@ -70,7 +70,7 @@ describe('SkillEditor', () => {
       .fn()
       .mockRejectedValue(new Error('Cannot write SKILL.md at /tmp: permission denied'))
 
-    render(<SkillEditor skill={skill} onSave={onSave} />)
+    render(<SkillEditor skill={skill} onSave={onSave} onDelete={vi.fn()} />)
 
     fireEvent.change(screen.getByRole('textbox'), {
       target: { value: 'changed' },
@@ -81,8 +81,38 @@ describe('SkillEditor', () => {
   })
 
   it('shows empty prompt when no skill selected', () => {
-    render(<SkillEditor skill={null} onSave={vi.fn()} />)
+    render(<SkillEditor skill={null} onSave={vi.fn()} onDelete={vi.fn()} />)
 
     expect(screen.getByText(/selecione uma skill/i)).toBeInTheDocument()
+  })
+
+  it('opens confirm modal and deletes only after confirm', async () => {
+    const onDelete = vi.fn().mockResolvedValue(undefined)
+    render(<SkillEditor skill={skill} onSave={vi.fn()} onDelete={onDelete} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /excluir/i }))
+    const dialog = screen.getByRole('dialog')
+    expect(dialog).toBeInTheDocument()
+    expect(onDelete).not.toHaveBeenCalled()
+
+    fireEvent.click(within(dialog).getByRole('button', { name: /^excluir$/i }))
+    await waitFor(() => {
+      expect(onDelete).toHaveBeenCalledWith('id-1')
+    })
+  })
+
+  it('closes confirm modal without deleting on cancel', () => {
+    const onDelete = vi.fn()
+    render(<SkillEditor skill={skill} onSave={vi.fn()} onDelete={onDelete} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /excluir/i }))
+    fireEvent.click(
+      within(screen.getByRole('dialog')).getByRole('button', {
+        name: /cancelar/i,
+      }),
+    )
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(onDelete).not.toHaveBeenCalled()
   })
 })

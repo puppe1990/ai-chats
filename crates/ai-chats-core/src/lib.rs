@@ -12,8 +12,8 @@ pub use aggregate::{aggregate_chats, PROVIDER_TIMEOUT_MS};
 pub use list::{build_chat_list_response, CHAT_PAGE_SIZE};
 pub use paths::DataPaths;
 pub use skills::{
-    encode_skill_id, get_skill, list_skills, save_skill, SkillDetail, SkillPaths, SkillSource,
-    SkillSummary,
+    delete_skill, encode_skill_id, get_skill, list_skills, save_skill, SkillDetail, SkillPaths,
+    SkillSource, SkillSummary,
 };
 pub use types::*;
 

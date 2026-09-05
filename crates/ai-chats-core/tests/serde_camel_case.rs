@@ -23,6 +23,12 @@ fn chat_session_serializes_camel_case() {
 }
 
 #[test]
+fn commandcode_source_serializes_lowercase_without_underscore() {
+    let v = serde_json::to_value(&ChatSource::CommandCode).unwrap();
+    assert_eq!(v.as_str(), Some("commandcode"));
+}
+
+#[test]
 fn chat_message_role_lowercase() {
     let m = ChatMessage {
         id: "1".into(),

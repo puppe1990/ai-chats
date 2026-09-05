@@ -40,4 +40,19 @@ describe('chat-id route helpers', () => {
       'claude:59d60b82-b957-48e6-adff-c1cfd70a2470',
     )
   })
+
+  it('supports commandcode source ids', () => {
+    expect(
+      toChatRouteParams('commandcode:7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e'),
+    ).toEqual({
+      source: 'commandcode',
+      sessionId: '7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e',
+    })
+  })
+
+  it('formats commandcode copy id as resume command', () => {
+    expect(formatCopyId('commandcode:7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e')).toBe(
+      'cmd --resume 7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e',
+    )
+  })
 })

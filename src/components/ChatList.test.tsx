@@ -106,6 +106,7 @@ describe('ChatList', () => {
     expect(screen.getByRole('button', { name: /Grok/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Codex/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Claude Code/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Command Code/ })).toBeInTheDocument()
   })
 
   it('filters chats by search query via backend', async () => {

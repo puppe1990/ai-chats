@@ -7,6 +7,7 @@ export interface DataPaths {
   codexHome: string
   opencodeDataDir: string
   claudeHome: string
+  commandcodeHome: string
 }
 
 export function getDataPaths(): DataPaths {
@@ -18,5 +19,6 @@ export function getDataPaths(): DataPaths {
     opencodeDataDir:
       process.env.OPENCODE_DATA_DIR ?? path.join(home, '.local', 'share', 'opencode'),
     claudeHome: process.env.CLAUDE_HOME ?? path.join(home, '.claude'),
+    commandcodeHome: process.env.COMMANDCODE_HOME ?? path.join(home, '.commandcode'),
   }
 }

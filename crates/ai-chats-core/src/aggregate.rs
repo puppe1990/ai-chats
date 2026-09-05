@@ -1,5 +1,5 @@
 use crate::paths::DataPaths;
-use crate::providers::{claude, codex, cursor, grok, opencode};
+use crate::providers::{claude, codex, commandcode, cursor, grok, opencode};
 use crate::types::ChatSession;
 use std::sync::mpsc;
 use std::time::Duration;
@@ -45,6 +45,7 @@ pub fn aggregate_chats(paths: &DataPaths) -> Vec<ChatSession> {
     let cursor_chats = paths.cursor_home.join("chats");
     let opencode_db = paths.opencode_data_dir.join("opencode.db");
     let claude_home = paths.claude_home.clone();
+    let commandcode_home = paths.commandcode_home.clone();
 
     let grok_rx = spawn_fetch("grok", move || {
         grok::fetch_grok_chats(&grok_sessions).unwrap_or_else(|err| {
@@ -68,20 +69,29 @@ pub fn aggregate_chats(paths: &DataPaths) -> Vec<ChatSession> {
             vec![]
         })
     });
+    let commandcode_rx = spawn_fetch("commandcode", move || {
+        commandcode::fetch_commandcode_chats(&commandcode_home).unwrap_or_else(|err| {
+            eprintln!("[aggregate_chats] commandcode provider failed: {err}");
+            vec![]
+        })
+    });
 
     let grok = recv_fetch("grok", grok_rx);
     let codex = recv_fetch("codex", codex_rx);
     let cursor = recv_fetch("cursor", cursor_rx);
     let opencode = recv_fetch("opencode", opencode_rx);
     let claude = recv_fetch("claude", claude_rx);
+    let commandcode = recv_fetch("commandcode", commandcode_rx);
 
-    let mut all =
-        Vec::with_capacity(grok.len() + codex.len() + cursor.len() + opencode.len() + claude.len());
+    let mut all = Vec::with_capacity(
+        grok.len() + codex.len() + cursor.len() + opencode.len() + claude.len() + commandcode.len(),
+    );
     all.extend(grok);
     all.extend(codex);
     all.extend(cursor);
     all.extend(opencode);
     all.extend(claude);
+    all.extend(commandcode);
 
     all.sort_by(|a, b| b.updated_at.cmp(&a.updated_at));
     all

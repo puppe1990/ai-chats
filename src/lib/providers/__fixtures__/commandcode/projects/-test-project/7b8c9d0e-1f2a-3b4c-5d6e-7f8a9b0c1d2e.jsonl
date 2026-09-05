@@ -1,0 +1,4 @@
+{"type":"session","version":3,"id":"7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e","timestamp":"2026-09-03T16:10:47.946Z","cwd":"/test/commandcode-project"}
+{"type":"message","id":"m1","parentId":null,"timestamp":"2026-09-03T16:11:02.685Z","message":{"role":"user","content":[{"type":"text","text":"Add Command Code chat history"}]}}
+{"type":"message","id":"m2","parentId":"m1","timestamp":"2026-09-03T16:11:06.451Z","message":{"role":"assistant","content":[{"type":"thinking","thinking":"hidden"},{"type":"text","text":"I'll parse the session JSONL files."},{"type":"tool_use","id":"call_1","name":"read_file","input":{"path":"/test/session.jsonl"}}]},"model":"deepseek/deepseek-v4-flash","effort":"max"}
+{"type":"message","id":"m3","parentId":"m2","timestamp":"2026-09-03T16:11:07.000Z","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"call_1","content":[{"type":"text","text":"ok"}]}]}}

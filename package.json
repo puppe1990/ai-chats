@@ -1,7 +1,7 @@
 {
   "name": "ai-chats",
   "version": "0.1.0",
-  "description": "Local desktop/web aggregator for Cursor, Grok, Codex, OpenCode, and Claude chat sessions",
+  "description": "Local desktop/web aggregator for Cursor, Grok, Codex, OpenCode, Claude, and Command Code chat sessions",
   "license": "MIT",
   "private": false,
   "type": "module",

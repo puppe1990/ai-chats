@@ -1,8 +1,8 @@
 {
   "app": {
     "name": "AI Chats",
-    "tagline": "Cursor, Grok, Codex, OpenCode & Claude Code — sorted by most recent",
-    "loadingProviders": "Reading sessions from Cursor, Grok, Codex, OpenCode, and Claude Code"
+    "tagline": "Cursor, Grok, Codex, OpenCode, Claude Code & Command Code — sorted by most recent",
+    "loadingProviders": "Reading sessions from Cursor, Grok, Codex, OpenCode, Claude Code, and Command Code"
   },
   "nav": {
     "loading": "Loading…",
@@ -32,6 +32,13 @@
     "saveError": "Could not save skill",
     "loadError": "Could not load skill",
     "notFound": "Skill not found (id={{id}})",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Are you sure?",
+    "deleteConfirmBody": "Delete skill “{{name}}”? This cannot be undone.",
+    "deleteCancel": "Cancel",
+    "deleteConfirm": "Delete",
+    "deleting": "Deleting…",
+    "deleteError": "Could not delete skill",
     "symlink": "symlink",
     "loadingTitle": "Loading skills…",
     "loadingDescription": "Reading skill folders from this computer"

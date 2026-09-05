@@ -1,4 +1,10 @@
-export type ChatSource = 'cursor' | 'grok' | 'codex' | 'opencode' | 'claude'
+export type ChatSource =
+  | 'cursor'
+  | 'grok'
+  | 'codex'
+  | 'opencode'
+  | 'claude'
+  | 'commandcode'
 
 export interface ChatSession {
   id: string
@@ -33,4 +39,5 @@ export const SOURCE_LABELS: Record<ChatSource, string> = {
   codex: 'Codex',
   opencode: 'OpenCode',
   claude: 'Claude Code',
+  commandcode: 'Command Code',
 }

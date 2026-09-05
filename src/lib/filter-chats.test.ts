@@ -56,6 +56,22 @@ describe('filterChats', () => {
     expect(filterChats(sample, { query: 'claude code' })).toHaveLength(1)
   })
 
+  it('filters by commandcode source label', () => {
+    const withCommandCode: ChatSession[] = [
+      ...sample,
+      {
+        id: 'commandcode:4',
+        source: 'commandcode',
+        title: 'Parse session jsonl',
+        cwd: '/Users/test/commandcode-project',
+        createdAt: '2026-09-03T16:10:47Z',
+        updatedAt: '2026-09-03T16:11:06Z',
+      },
+    ]
+    expect(filterChats(withCommandCode, { source: 'commandcode' })).toHaveLength(1)
+    expect(filterChats(withCommandCode, { query: 'command code' })).toHaveLength(1)
+  })
+
   it('filters to favorite ids when favoritesOnly is set', () => {
     const onlyFav = filterChats(sample, {
       favoritesOnly: true,

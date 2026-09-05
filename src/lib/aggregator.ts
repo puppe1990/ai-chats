@@ -4,6 +4,7 @@ import { sortByUpdatedAt } from './sort'
 import type { ChatSession } from './types'
 import { fetchClaudeChats } from './providers/claude'
 import { fetchCodexChats } from './providers/codex'
+import { fetchCommandCodeChats } from './providers/commandcode'
 import { fetchCursorChats } from './providers/cursor'
 import { fetchGrokChats } from './providers/grok'
 import { fetchOpenCodeChats } from './providers/opencode'
@@ -44,7 +45,7 @@ export async function safeFetch(
 }
 
 export async function aggregateChats(paths: DataPaths): Promise<ChatSession[]> {
-  const [grok, codex, cursor, opencode, claude] = await Promise.all([
+  const [grok, codex, cursor, opencode, claude, commandcode] = await Promise.all([
     safeFetch('grok', () => fetchGrokChats(path.join(paths.grokHome, 'sessions'))),
     safeFetch('codex', () => fetchCodexChats(paths.codexHome)),
     safeFetch('cursor', () => fetchCursorChats(path.join(paths.cursorHome, 'chats'))),
@@ -52,7 +53,15 @@ export async function aggregateChats(paths: DataPaths): Promise<ChatSession[]> {
       fetchOpenCodeChats(path.join(paths.opencodeDataDir, 'opencode.db')),
     ),
     safeFetch('claude', () => fetchClaudeChats(paths.claudeHome)),
+    safeFetch('commandcode', () => fetchCommandCodeChats(paths.commandcodeHome)),
   ])
 
-  return sortByUpdatedAt([...grok, ...codex, ...cursor, ...opencode, ...claude])
+  return sortByUpdatedAt([
+    ...grok,
+    ...codex,
+    ...cursor,
+    ...opencode,
+    ...claude,
+    ...commandcode,
+  ])
 }

@@ -1,4 +1,4 @@
-//! Read and write SKILL.md for a skill id.
+//! Read, write, and delete SKILL.md entries for a skill id.
 
 use super::frontmatter::parse_frontmatter;
 use super::id::decode_skill_id;
@@ -7,7 +7,7 @@ use super::path_guard::listed_path_is_under_skill_roots;
 use super::paths::SkillPaths;
 use super::types::SkillDetail;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Load full SKILL.md. `Ok(None)` if id is unknown or skill is gone.
 ///
@@ -68,6 +68,60 @@ pub fn save_skill(id: &str, content: &str, paths: &SkillPaths) -> Result<SkillDe
             listed.display()
         )
     })
+}
+
+/// Delete a listed skill entry under configured roots.
+///
+/// WHY: for symlinks, remove only the link so shared real skills stay installed;
+/// for real directories, remove the whole skill folder (including SKILL.md).
+pub fn delete_skill(id: &str, paths: &SkillPaths) -> Result<(), String> {
+    let listed = decode_skill_id(id).ok_or_else(|| {
+        format!(
+            "Skill not found: invalid id (expected hex-encoded absolute path), received id={id:?}"
+        )
+    })?;
+
+    if !listed_path_is_under_skill_roots(&listed, paths) {
+        return Err(format!(
+            "Path escapes skill roots (not under configured skill directories): path={}",
+            listed.display()
+        ));
+    }
+
+    let summary = find_summary_for_listed_path(&listed, paths).ok_or_else(|| {
+        format!(
+            "Skill not found under roots: path={} id={id:?}",
+            listed.display()
+        )
+    })?;
+
+    let listed_path = Path::new(&summary.path);
+    remove_listed_skill_entry(listed_path, summary.is_symlink)
+}
+
+fn remove_listed_skill_entry(listed_path: &Path, is_symlink: bool) -> Result<(), String> {
+    if is_symlink {
+        return fs::remove_file(listed_path).map_err(|error| {
+            format!(
+                "Cannot delete skill symlink at path={} error={error}",
+                listed_path.display()
+            )
+        });
+    }
+
+    if listed_path.is_dir() {
+        return fs::remove_dir_all(listed_path).map_err(|error| {
+            format!(
+                "Cannot delete skill directory at path={} error={error}",
+                listed_path.display()
+            )
+        });
+    }
+
+    Err(format!(
+        "Cannot delete skill: expected directory or symlink at path={}",
+        listed_path.display()
+    ))
 }
 
 fn detail_from_summary_and_content(

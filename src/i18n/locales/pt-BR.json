@@ -1,8 +1,8 @@
 {
   "app": {
     "name": "AI Chats",
-    "tagline": "Cursor, Grok, Codex, OpenCode & Claude Code — ordenados por mais recentes",
-    "loadingProviders": "Lendo sessões do Cursor, Grok, Codex, OpenCode e Claude Code"
+    "tagline": "Cursor, Grok, Codex, OpenCode, Claude Code & Command Code — ordenados por mais recentes",
+    "loadingProviders": "Lendo sessões do Cursor, Grok, Codex, OpenCode, Claude Code e Command Code"
   },
   "nav": {
     "loading": "Carregando…",
@@ -32,6 +32,13 @@
     "saveError": "Não foi possível salvar a skill",
     "loadError": "Não foi possível carregar a skill",
     "notFound": "Skill não encontrada (id={{id}})",
+    "delete": "Excluir",
+    "deleteConfirmTitle": "Tem certeza?",
+    "deleteConfirmBody": "Excluir a skill “{{name}}”? Esta ação não pode ser desfeita.",
+    "deleteCancel": "Cancelar",
+    "deleteConfirm": "Excluir",
+    "deleting": "Excluindo…",
+    "deleteError": "Não foi possível excluir a skill",
     "symlink": "symlink",
     "loadingTitle": "Carregando skills…",
     "loadingDescription": "Lendo pastas de skills deste computador"

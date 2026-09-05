@@ -1,4 +1,4 @@
-use ai_chats_core::{get_skill, list_skills, save_skill, SkillPaths, SkillSource};
+use ai_chats_core::{delete_skill, get_skill, list_skills, save_skill, SkillPaths, SkillSource};
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -200,6 +200,73 @@ fn save_skill_rejects_path_escape() {
             || err.to_lowercase().contains("not under"),
         "unexpected error: {err}"
     );
+}
+
+#[test]
+fn delete_skill_removes_skill_directory() {
+    let tmp = tempfile_dir("delete-dir");
+    let paths = make_paths(&tmp);
+    fs::create_dir_all(&paths.grok_skills).unwrap();
+    let skill_dir = write_skill(
+        &paths.grok_skills,
+        "doomed",
+        "---\nname: doomed\n---\n\nbye\n",
+    );
+
+    let listed = list_skills(&paths);
+    assert_eq!(listed.len(), 1);
+    delete_skill(&listed[0].id, &paths).unwrap();
+
+    assert!(!skill_dir.exists(), "skill directory should be gone");
+    assert!(list_skills(&paths).is_empty());
+}
+
+#[test]
+fn delete_skill_removes_symlink_only_not_real_dir() {
+    let tmp = tempfile_dir("delete-symlink");
+    let paths = make_paths(&tmp);
+    fs::create_dir_all(&paths.agents_skills).unwrap();
+    fs::create_dir_all(&paths.claude_skills).unwrap();
+
+    let real = write_skill(
+        &paths.agents_skills,
+        "shared",
+        "---\nname: shared\n---\n\nbody\n",
+    );
+    let link = paths.claude_skills.join("shared");
+    std::os::unix::fs::symlink(&real, &link).unwrap();
+
+    let linked = list_skills(&paths)
+        .into_iter()
+        .find(|s| s.source == SkillSource::Claude)
+        .expect("claude symlink skill");
+
+    delete_skill(&linked.id, &paths).unwrap();
+
+    assert!(!link.exists(), "symlink entry should be removed");
+    assert!(real.exists(), "real skill directory must remain");
+    assert!(real.join("SKILL.md").is_file());
+    assert_eq!(list_skills(&paths).len(), 1);
+    assert_eq!(list_skills(&paths)[0].source, SkillSource::Agents);
+}
+
+#[test]
+fn delete_skill_rejects_path_escape() {
+    let tmp = tempfile_dir("delete-escape");
+    let paths = make_paths(&tmp);
+    let outside = tmp.join("outside/evil");
+    fs::create_dir_all(&outside).unwrap();
+    fs::write(outside.join("SKILL.md"), "hack").unwrap();
+
+    let evil_id = ai_chats_core::encode_skill_id(&outside);
+    let err = delete_skill(&evil_id, &paths).unwrap_err();
+    assert!(
+        err.to_lowercase().contains("escape")
+            || err.to_lowercase().contains("outside")
+            || err.to_lowercase().contains("not under"),
+        "unexpected error: {err}"
+    );
+    assert!(outside.join("SKILL.md").is_file());
 }
 
 /// Temp dir under the system temp folder (no extra crate).

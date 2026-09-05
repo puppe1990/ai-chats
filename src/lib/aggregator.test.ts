@@ -50,6 +50,17 @@ vi.mock('./providers/claude', () => ({
     },
   ] satisfies ChatSession[]),
 }))
+vi.mock('./providers/commandcode', () => ({
+  fetchCommandCodeChats: vi.fn().mockResolvedValue([
+    {
+      id: 'commandcode:1',
+      source: 'commandcode',
+      title: 'Command Code chat',
+      createdAt: '2026-06-24T07:30:00Z',
+      updatedAt: '2026-06-24T13:30:00Z',
+    },
+  ] satisfies ChatSession[]),
+}))
 
 describe('aggregateChats', () => {
   beforeEach(() => {
@@ -63,9 +74,16 @@ describe('aggregateChats', () => {
       codexHome: '/x',
       opencodeDataDir: '/o',
       claudeHome: '/cl',
+      commandcodeHome: '/cc',
     })
-    expect(result).toHaveLength(4)
-    expect(result.map((s) => s.source)).toEqual(['codex', 'claude', 'grok', 'cursor'])
+    expect(result).toHaveLength(5)
+    expect(result.map((s) => s.source)).toEqual([
+      'codex',
+      'commandcode',
+      'claude',
+      'grok',
+      'cursor',
+    ])
   })
 
   it('returns empty for a provider that never resolves (timeout)', async () => {
@@ -87,10 +105,16 @@ describe('aggregateChats', () => {
       codexHome: '/x',
       opencodeDataDir: '/o',
       claudeHome: '/cl',
+      commandcodeHome: '/cc',
     })
     const elapsed = Date.now() - started
 
-    expect(result.map((s) => s.source).sort()).toEqual(['claude', 'codex', 'cursor'])
+    expect(result.map((s) => s.source).sort()).toEqual([
+      'claude',
+      'codex',
+      'commandcode',
+      'cursor',
+    ])
     // Should not wait for the full hang — timeout bounds total wait.
     expect(elapsed).toBeLessThan(PROVIDER_TIMEOUT_MS + 1500)
   }, 10_000)

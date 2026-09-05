@@ -4,9 +4,9 @@
 //! The webview loads the built SPA from `frontendDist` (no Node backend).
 
 use ai_chats_core::{
-    get_chat_detail as core_detail, get_chats as core_chats, get_skill as core_get_skill,
-    list_skills as core_list_skills, save_skill as core_save_skill, ChatDetail, ChatListQuery,
-    ChatListResponse, DataPaths, SkillDetail, SkillPaths, SkillSummary,
+    delete_skill as core_delete_skill, get_chat_detail as core_detail, get_chats as core_chats,
+    get_skill as core_get_skill, list_skills as core_list_skills, save_skill as core_save_skill,
+    ChatDetail, ChatListQuery, ChatListResponse, DataPaths, SkillDetail, SkillPaths, SkillSummary,
 };
 
 #[tauri::command]
@@ -34,6 +34,11 @@ fn save_skill(skill_id: String, content: String) -> Result<SkillDetail, String> 
     core_save_skill(&skill_id, &content, &SkillPaths::from_env())
 }
 
+#[tauri::command]
+fn delete_skill(skill_id: String) -> Result<(), String> {
+    core_delete_skill(&skill_id, &SkillPaths::from_env())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -50,7 +55,8 @@ pub fn run() {
             get_chat_detail,
             get_skills,
             get_skill,
-            save_skill
+            save_skill,
+            delete_skill
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

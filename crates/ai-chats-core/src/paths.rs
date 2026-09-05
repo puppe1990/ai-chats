@@ -8,6 +8,7 @@ pub struct DataPaths {
     pub codex_home: PathBuf,
     pub opencode_data_dir: PathBuf,
     pub claude_home: PathBuf,
+    pub commandcode_home: PathBuf,
 }
 
 fn home_dir() -> PathBuf {
@@ -36,6 +37,9 @@ impl DataPaths {
             claude_home: env::var_os("CLAUDE_HOME")
                 .map(PathBuf::from)
                 .unwrap_or_else(|| home.join(".claude")),
+            commandcode_home: env::var_os("COMMANDCODE_HOME")
+                .map(PathBuf::from)
+                .unwrap_or_else(|| home.join(".commandcode")),
         }
     }
 }

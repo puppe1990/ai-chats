@@ -11,6 +11,8 @@ const COLORS: Record<ChatSource, string> = {
     'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30',
   claude:
     'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-500/20 dark:text-amber-200 dark:border-amber-500/30',
+  commandcode:
+    'bg-teal-50 text-teal-800 border-teal-200 dark:bg-teal-500/20 dark:text-teal-200 dark:border-teal-500/30',
 }
 
 export function SourceBadge({ source }: { source: ChatSource }) {

@@ -179,6 +179,7 @@ fn fixture_paths() -> DataPaths {
         codex_home: root.join("codex"),
         opencode_data_dir: root.join("opencode"),
         claude_home: root.join("claude"),
+        commandcode_home: root.join("commandcode"),
     }
 }
 

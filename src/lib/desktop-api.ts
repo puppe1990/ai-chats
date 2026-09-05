@@ -29,3 +29,7 @@ export async function saveSkill(
 ): Promise<SkillDetail> {
   return invoke<SkillDetail>('save_skill', { skillId, content })
 }
+
+export async function deleteSkill(skillId: string): Promise<void> {
+  await invoke<void>('delete_skill', { skillId })
+}

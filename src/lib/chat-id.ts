@@ -1,6 +1,13 @@
 import type { ChatSource } from './types'
 
-const SOURCES: ChatSource[] = ['cursor', 'grok', 'codex', 'opencode', 'claude']
+const SOURCES: ChatSource[] = [
+  'cursor',
+  'grok',
+  'codex',
+  'opencode',
+  'claude',
+  'commandcode',
+]
 
 export function toChatRouteParams(chatId: string): {
   source: ChatSource
@@ -42,6 +49,11 @@ export function formatCopyId(chatId: string, source?: ChatSource | string): stri
     // Guard against double-prefix if id was already a resume command.
     const bare = sessionId.replace(/^grok\s+--resume\s+/i, '').trim()
     return `grok --resume ${bare}`
+  }
+
+  if (resolvedSource === 'commandcode') {
+    const bare = sessionId.replace(/^cmd\s+--resume\s+/i, '').trim()
+    return `cmd --resume ${bare}`
   }
 
   return chatId

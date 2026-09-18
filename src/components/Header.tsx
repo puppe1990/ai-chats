@@ -1,5 +1,7 @@
 import { Link } from '@tanstack/react-router'
+import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useHeaderHeightVar } from '../lib/use-header-height'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { NavigationProgress } from './NavigationProgress'
 import { RefreshButton } from './RefreshButton'
@@ -7,12 +9,17 @@ import ThemeToggle from './ThemeToggle'
 
 export default function Header() {
   const { t } = useTranslation()
+  const headerRef = useRef<HTMLElement | null>(null)
+  useHeaderHeightVar(headerRef)
 
   return (
     <>
       {/* Glass overlay + top bar while routes transition */}
       <NavigationProgress />
-      <header className="relative sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] px-4 backdrop-blur-lg">
+      <header
+        ref={headerRef}
+        className="relative sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] px-4 backdrop-blur-lg"
+      >
         <nav className="page-wrap flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-4">
           <h2 className="m-0 flex-shrink-0 text-base font-semibold tracking-tight">
             <Link

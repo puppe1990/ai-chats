@@ -26,6 +26,7 @@ export function LoadingSpinner({
       className={`inline-flex items-center gap-2.5 ${className}`}
     >
       <span className={`brand-spinner ${SIZE_CLASS[size]}`} aria-hidden>
+        <span className="brand-spinner__glow" />
         <span className="brand-spinner__ring brand-spinner__ring--outer" />
         <span className="brand-spinner__ring brand-spinner__ring--inner" />
         <span className="brand-spinner__core" />

@@ -12,7 +12,7 @@ vi.mock('@tanstack/react-router', () => ({
 }))
 
 describe('NavigationProgress', () => {
-  it('shows top bar and pill while navigating', () => {
+  it('shows overlay spinner and top bar while navigating', () => {
     mockUseRouterState.mockReturnValue({
       isLoading: true,
       matches: [{ routeId: '/', isFetching: 'loader', status: 'pending' }],
@@ -20,20 +20,27 @@ describe('NavigationProgress', () => {
 
     render(<NavigationProgress />)
 
-    const statuses = screen.getAllByRole('status')
-    expect(statuses.some((el) => el.getAttribute('aria-busy') === 'true')).toBe(true)
+    const overlay = document.querySelector('.route-transition')
+    expect(overlay).toHaveClass('route-transition--on')
+    expect(overlay).toHaveAttribute('aria-busy', 'true')
     expect(screen.getByText('Carregando…')).toBeInTheDocument()
     expect(document.querySelector('.navigation-progress-bar')).toBeTruthy()
-    expect(document.querySelector('.nav-loading-pill')).toBeTruthy()
+    expect(document.querySelector('.route-transition__card')).toBeTruthy()
+    expect(document.querySelector('.brand-spinner')).toBeTruthy()
   })
 
-  it('renders nothing when idle', () => {
+  it('hides overlay when idle so CSS can fade it out', () => {
     mockUseRouterState.mockReturnValue({
       isLoading: false,
       matches: [{ routeId: '/', isFetching: false, status: 'success' }],
     })
 
-    const { container } = render(<NavigationProgress />)
-    expect(container).toBeEmptyDOMElement()
+    render(<NavigationProgress />)
+
+    const overlay = document.querySelector('.route-transition')
+    expect(overlay).toBeTruthy()
+    expect(overlay).not.toHaveClass('route-transition--on')
+    expect(overlay).toHaveAttribute('aria-hidden', 'true')
+    expect(overlay).toHaveAttribute('aria-busy', 'false')
   })
 })

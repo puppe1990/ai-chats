@@ -9,6 +9,7 @@ export default tseslint.config(
   {
     ignores: [
       'dist',
+      'target',
       'node_modules',
       '.tanstack',
       'src/routeTree.gen.ts',

@@ -26,36 +26,28 @@ function selectIsNavigating(state: {
 }
 
 /**
- * Always-visible loading feedback while routes load:
- * - thick top progress bar (hard to miss)
- * - floating status pill with spinner + label
+ * Route-change overlay: top progress bar + glass spinner that fades in/out.
  */
 export function NavigationProgress() {
   const { t } = useTranslation()
   const isPending = useRouterState({ select: selectIsNavigating })
 
-  if (!isPending) return null
-
   return (
     <div
-      className="pointer-events-none"
+      className={`route-transition${isPending ? ' route-transition--on' : ''}`}
       role="status"
       aria-live="polite"
-      aria-busy="true"
+      aria-busy={isPending}
+      aria-hidden={!isPending}
     >
-      <div
-        className="fixed inset-x-0 top-0 z-[200] h-1 overflow-hidden bg-[color-mix(in_oklab,var(--lagoon)_18%,transparent)]"
-        aria-hidden
-      >
-        <div className="navigation-progress-bar h-full bg-[linear-gradient(90deg,var(--lagoon),var(--palm),var(--lagoon))]" />
+      <div className="route-transition__bar-track" aria-hidden>
+        <div className="navigation-progress-bar" />
       </div>
-
-      <div className="fixed left-1/2 top-[max(4.75rem,env(safe-area-inset-top))] z-[200] -translate-x-1/2">
-        <div className="nav-loading-pill">
-          <LoadingSpinner size="sm" />
-          <span className="text-xs font-semibold tracking-tight text-[var(--sea-ink)]">
-            {t('nav.loading')}
-          </span>
+      <div className="route-transition__veil" aria-hidden />
+      <div className="route-transition__stage">
+        <div className="route-transition__card">
+          <LoadingSpinner size="lg" />
+          <span className="route-transition__label">{t('nav.loading')}</span>
         </div>
       </div>
     </div>

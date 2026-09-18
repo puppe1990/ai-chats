@@ -11,6 +11,7 @@ describe('LoadingSpinner', () => {
     expect(screen.getByRole('status', { name: 'Carregando chats' })).toBeInTheDocument()
     expect(screen.getByText('Carregando chats')).toBeInTheDocument()
     expect(container.querySelector('.brand-spinner')).toBeTruthy()
+    expect(container.querySelector('.brand-spinner__glow')).toBeTruthy()
     expect(container.querySelector('.brand-spinner__ring--outer')).toBeTruthy()
     expect(container.querySelector('.brand-spinner__ring--inner')).toBeTruthy()
   })

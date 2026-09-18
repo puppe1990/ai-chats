@@ -41,6 +41,18 @@ describe('chat-id route helpers', () => {
     )
   })
 
+  it('formats opencode copy id as session command', () => {
+    expect(formatCopyId('opencode:ses_f4eafd656ffeQe78qZDRnPukqV')).toBe(
+      'opencode --session ses_f4eafd656ffeQe78qZDRnPukqV',
+    )
+  })
+
+  it('does not double-prefix an opencode session command', () => {
+    expect(formatCopyId('opencode:opencode --session ses_abc')).toBe(
+      'opencode --session ses_abc',
+    )
+  })
+
   it('supports commandcode source ids', () => {
     expect(
       toChatRouteParams('commandcode:7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e'),

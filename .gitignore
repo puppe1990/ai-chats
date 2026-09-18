@@ -18,3 +18,4 @@ AI Chats.dmg
 src-tauri/target
 src-tauri/gen
 .worktrees/
+.playwright-cli/

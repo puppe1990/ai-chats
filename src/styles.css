@@ -676,6 +676,17 @@ a {
   color: var(--sea-ink);
 }
 
+/* Chat detail header sticks below the measured global header height. */
+.chat-detail-header {
+  position: sticky;
+  top: var(--app-header-h, 0px);
+  z-index: 40;
+  margin-inline: -1.5rem;
+  padding-inline: 1.5rem;
+  background: color-mix(in oklab, var(--bg-base) 88%, transparent);
+  backdrop-filter: blur(12px) saturate(1.1);
+}
+
 .chat-item-pending-badge {
   display: none;
   position: absolute;

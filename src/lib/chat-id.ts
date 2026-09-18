@@ -56,5 +56,10 @@ export function formatCopyId(chatId: string, source?: ChatSource | string): stri
     return `cmd --resume ${bare}`
   }
 
+  if (resolvedSource === 'opencode') {
+    const bare = sessionId.replace(/^opencode\s+--session\s+/i, '').trim()
+    return `opencode --session ${bare}`
+  }
+
   return chatId
 }

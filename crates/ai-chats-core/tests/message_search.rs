@@ -21,3 +21,24 @@ fn snippet_adds_ellipsis_when_clipped() {
 fn snippet_none_when_missing() {
     assert!(snippet_around("hello", "xyz").is_none());
 }
+
+#[test]
+fn snippet_handles_multibyte_chars_around_needle() {
+    let hay = format!("{}NEEDLE{}", "€".repeat(40), "é".repeat(50));
+    let snippet = snippet_around(&hay, "needle").expect("hit");
+    assert!(snippet.contains("NEEDLE"), "snippet={snippet}");
+}
+
+#[test]
+fn snippet_caps_at_max_and_keeps_trailing_ellipsis() {
+    let needle = "N".repeat(50);
+    let hay = format!("{}{needle}{}", "a".repeat(100), "b".repeat(100));
+    let snippet = snippet_around(&hay, &needle).expect("hit");
+    assert!(snippet.contains(&needle), "snippet={snippet}");
+    assert!(snippet.ends_with('…'), "snippet={snippet}");
+    assert!(
+        snippet.chars().count() <= 200,
+        "len={}",
+        snippet.chars().count()
+    );
+}

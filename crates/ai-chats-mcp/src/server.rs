@@ -23,7 +23,7 @@ impl AiChatsMcp {
 }
 
 fn json_ok(value: serde_json::Value) -> CallToolResult {
-    let text = serde_json::to_string_pretty(&value).unwrap_or_else(|_| value.to_string());
+    let text = serde_json::to_string(&value).unwrap_or_else(|_| value.to_string());
     CallToolResult::success(vec![ContentBlock::text(text)])
 }
 
@@ -123,5 +123,19 @@ mod tests {
         ] {
             assert!(names.contains(&expected.to_string()), "missing {expected}");
         }
+    }
+
+    fn json_ok_text(value: serde_json::Value) -> String {
+        match &json_ok(value).content[0] {
+            ContentBlock::Text(block) => block.text.clone(),
+            other => panic!("expected text block, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn json_ok_encodes_compact_json() {
+        let text = json_ok_text(serde_json::json!({"a": 1, "b": true}));
+        assert_eq!(text, r#"{"a":1,"b":true}"#);
+        assert!(!text.contains('\n'));
     }
 }

@@ -5,11 +5,12 @@ use crate::compact::{
 use ai_chats_core::list::source_key;
 use ai_chats_core::{
     get_chat_detail, get_chats, parse_source_arg, search_chat_messages, ChatListQuery, DataPaths,
-    MessageSearchQuery,
+    MessageSearchQuery, MessageSearchResponse,
 };
 use rmcp::schemars::{self, JsonSchema};
 use serde::Deserialize;
 use serde_json::Value;
+use std::time::{Duration, Instant};
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct SearchChatsParams {
@@ -90,10 +91,22 @@ pub fn handle_list_recent(paths: &DataPaths, params: ListRecentParams) -> Result
     Ok(compact_recent(&response))
 }
 
+fn log_scan_b(result: &MessageSearchResponse, elapsed: Duration) {
+    tracing::info!(
+        query = %result.query,
+        chatsScanned = result.chats_scanned,
+        hits = result.hits.len(),
+        truncated = result.truncated,
+        elapsed = ?elapsed,
+        "search_chat_messages"
+    );
+}
+
 pub fn handle_search_messages(
     paths: &DataPaths,
     params: SearchMessagesParams,
 ) -> Result<Value, String> {
+    let started = Instant::now();
     let result = search_chat_messages(
         MessageSearchQuery {
             query: params.query,
@@ -104,6 +117,7 @@ pub fn handle_search_messages(
         paths,
     )
     .map_err(|e| e.to_string())?;
+    log_scan_b(&result, started.elapsed());
     Ok(serde_json::to_value(result).expect("serialize"))
 }
 

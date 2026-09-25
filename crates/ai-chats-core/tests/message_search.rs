@@ -1,4 +1,9 @@
-use ai_chats_core::snippet_around;
+use ai_chats_core::{
+    scan_chat_messages, search_chat_messages, snippet_around, ChatMessage, ChatMessageRole,
+    ChatSession, ChatSource, DataPaths, MessageSearchError, MessageSearchQuery,
+};
+use std::path::PathBuf;
+use std::time::{Duration, Instant};
 
 #[test]
 fn snippet_includes_needle_and_collapses_newlines() {
@@ -41,4 +46,138 @@ fn snippet_caps_at_max_and_keeps_trailing_ellipsis() {
         "len={}",
         snippet.chars().count()
     );
+}
+
+fn missing() -> PathBuf {
+    PathBuf::from("/tmp/ai-chats-missing-provider-root")
+}
+
+fn fixture_paths() -> DataPaths {
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+    DataPaths {
+        cursor_home: missing(),
+        grok_home: root.join("grok"),
+        codex_home: missing(),
+        opencode_data_dir: missing(),
+        claude_home: root.join("claude"),
+        commandcode_home: missing(),
+    }
+}
+
+fn session(id: &str, source: ChatSource) -> ChatSession {
+    ChatSession {
+        id: id.into(),
+        source,
+        title: id.into(),
+        cwd: None,
+        created_at: "2026-01-01T00:00:00.000Z".into(),
+        updated_at: "2026-01-01T00:00:00.000Z".into(),
+        message_count: None,
+        model: None,
+        storage_path: None,
+    }
+}
+
+fn msg(id: &str, content: &str) -> ChatMessage {
+    ChatMessage {
+        id: id.into(),
+        role: ChatMessageRole::User,
+        content: content.into(),
+        timestamp: None,
+    }
+}
+
+#[test]
+fn empty_query_is_an_error_with_received_value() {
+    let err = search_chat_messages(
+        MessageSearchQuery {
+            query: "   ".into(),
+            ..Default::default()
+        },
+        &fixture_paths(),
+    )
+    .unwrap_err();
+    match err {
+        MessageSearchError::EmptyQuery { received } => assert_eq!(received, "   "),
+        other => panic!("unexpected {other:?}"),
+    }
+}
+
+#[test]
+fn finds_claude_fixture_message() {
+    let result = search_chat_messages(
+        MessageSearchQuery {
+            query: "TanStack".into(),
+            ..Default::default()
+        },
+        &fixture_paths(),
+    )
+    .expect("search");
+    assert_eq!(result.hits.len(), 1);
+    assert_eq!(
+        result.hits[0].chat_id,
+        "claude:7a176d05-ee9d-42f2-81ee-72b9ac9c800c"
+    );
+    assert_eq!(result.hits[0].role, ChatMessageRole::User);
+    assert!(result.hits[0].snippet.contains("TanStack"));
+}
+
+#[test]
+fn source_filter_skips_other_providers() {
+    let result = search_chat_messages(
+        MessageSearchQuery {
+            query: "TanStack".into(),
+            source: Some("grok".into()),
+            ..Default::default()
+        },
+        &fixture_paths(),
+    )
+    .expect("search");
+    assert!(result.hits.is_empty());
+}
+
+#[test]
+fn max_hits_stops_early() {
+    let chats = vec![session("claude:1", ChatSource::Claude)];
+    let (hits, scanned, _truncated) = scan_chat_messages(
+        &chats,
+        "hit",
+        40,
+        1,
+        Instant::now() + Duration::from_secs(8),
+        |_| vec![msg("a", "hit one"), msg("b", "hit two")],
+    );
+    assert_eq!(hits.len(), 1);
+    assert_eq!(scanned, 1);
+}
+
+#[test]
+fn max_chats_sets_truncated() {
+    let chats = vec![
+        session("claude:1", ChatSource::Claude),
+        session("claude:2", ChatSource::Claude),
+    ];
+    let (_hits, scanned, truncated) = scan_chat_messages(
+        &chats,
+        "nope",
+        1,
+        10,
+        Instant::now() + Duration::from_secs(8),
+        |_| vec![msg("a", "nothing")],
+    );
+    assert_eq!(scanned, 1);
+    assert!(truncated);
+}
+
+#[test]
+fn no_match_returns_empty_hits() {
+    let result = search_chat_messages(
+        MessageSearchQuery {
+            query: "zzzz-not-in-fixtures".into(),
+            ..Default::default()
+        },
+        &fixture_paths(),
+    )
+    .expect("search");
+    assert!(result.hits.is_empty());
 }

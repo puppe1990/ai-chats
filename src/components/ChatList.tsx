@@ -17,9 +17,10 @@ import {
   writeStoredFavorites,
 } from '../lib/chat-favorites'
 import { CHAT_PAGE_SIZE, type ChatListResponse } from '../lib/chat-list'
+import { uniqueFolderLabels } from '../lib/chat-folders'
 import { getChats } from '../lib/desktop-api'
 import type { ChatSource } from '../lib/types'
-import { SOURCE_LABELS } from '../lib/types'
+import { ALL_FOLDERS, NO_FOLDER_FILTER, SOURCE_LABELS } from '../lib/types'
 import { ChatItem } from './ChatItem'
 import { LoadingSpinner } from './LoadingSpinner'
 import { Pagination } from './Pagination'
@@ -62,6 +63,7 @@ function isChatDragEvent(event: React.DragEvent) {
 export function ChatList({ initialData }: { initialData: ChatListResponse }) {
   const { t } = useTranslation()
   const [filter, setFilter] = useState<ChatSource | 'all'>('all')
+  const [folder, setFolder] = useState<string>(ALL_FOLDERS)
   const [favoritesOnly, setFavoritesOnly] = useState(false)
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
@@ -109,6 +111,7 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
         page,
         pageSize: CHAT_PAGE_SIZE,
         source: filter,
+        folder,
         query: debouncedQuery,
         order: chatOrder,
         favoriteIds: favoriteIdsRef.current,
@@ -127,10 +130,10 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
           setLoading(false)
         }
       })
-  }, [page, filter, debouncedQuery, chatOrder, favoritesOnly])
+  }, [page, filter, folder, debouncedQuery, chatOrder, favoritesOnly])
 
   const hasActiveSearch = debouncedQuery.trim().length > 0
-  const hasActiveFilter = filter !== 'all' || favoritesOnly
+  const hasActiveFilter = filter !== 'all' || favoritesOnly || folder !== ALL_FOLDERS
   // Local set so the Favoritos chip updates the instant a star is toggled.
   const favoriteCount = favoriteIds.length
 
@@ -141,6 +144,22 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
   }, [data.items, favoritesOnly, favoriteIds])
 
   const visibleTotalItems = favoritesOnly ? visibleItems.length : data.totalItems
+
+  // Shortest unique trailing path per folder, so equal basenames stay tellable apart.
+  const folderLabels = useMemo(
+    () =>
+      uniqueFolderLabels(
+        data.folders
+          .filter((entry) => entry.path !== NO_FOLDER_FILTER)
+          .map((entry) => entry.path),
+      ),
+    [data.folders],
+  )
+
+  function folderLabel(path: string) {
+    if (path === NO_FOLDER_FILTER) return t('chatList.noFolder')
+    return folderLabels.get(path) ?? path
+  }
 
   function commitReorder(draggedId: string, targetId: string) {
     const baseOrder = mergeChatOrder(chatOrder, data.items)
@@ -218,6 +237,38 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
         {t('chatList.reorderHint')}
       </p>
 
+      {data.folders.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <label
+            htmlFor="chat-folder-filter"
+            className="text-xs font-medium uppercase tracking-wide text-zinc-600 dark:text-zinc-300"
+          >
+            {t('chatList.folder')}
+          </label>
+          <select
+            id="chat-folder-filter"
+            value={folder}
+            onChange={(event) => {
+              setFolder(event.target.value)
+              setPage(1)
+            }}
+            className="max-w-full rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-900 shadow-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:border-zinc-400 dark:focus:ring-zinc-500"
+          >
+            <option value={ALL_FOLDERS}>
+              {t('chatList.allFolders', { count: data.totalChats })}
+            </option>
+            {data.folders.map((entry) => (
+              <option key={entry.path} value={entry.path} title={entry.path}>
+                {t('chatList.folderOption', {
+                  label: folderLabel(entry.path),
+                  count: entry.count,
+                })}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <div className="mb-2">
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-600 dark:text-zinc-300">
           {t('chatList.provider')}
@@ -271,6 +322,8 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
           {favoritesOnly && t('chatList.resultsFavorites')}
           {filter !== 'all' &&
             t('chatList.resultsIn', { source: SOURCE_LABELS[filter] })}
+          {folder !== ALL_FOLDERS &&
+            t('chatList.resultsInFolder', { folder: folderLabel(folder) })}
         </p>
       )}
 

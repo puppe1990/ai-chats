@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildChatListResponse, CHAT_PAGE_SIZE } from './chat-list'
 import type { ChatSession } from './types'
+import { NO_FOLDER_FILTER } from './types'
 
 const chats: ChatSession[] = Array.from({ length: 25 }, (_, index) => ({
   id: `grok:${index + 1}`,
@@ -79,5 +80,48 @@ describe('buildChatListResponse', () => {
     expect(result.totalItems).toBe(2)
     expect(result.items.map((c) => c.id)).toEqual(['grok:1', 'grok:2'])
     expect(result.totalChats).toBe(25)
+  })
+
+  it('counts chats per folder, most populated first', () => {
+    const perFolder: ChatSession[] = [
+      { ...chats[0], id: 'grok:1', cwd: '/Users/test/app' },
+      { ...chats[1], id: 'grok:2', cwd: '/Users/test/app' },
+      { ...chats[2], id: 'grok:3', cwd: '/Users/test/other' },
+      { ...chats[3], id: 'grok:4', cwd: undefined },
+    ]
+
+    const result = buildChatListResponse(perFolder, { page: 1 })
+
+    expect(result.folders).toEqual([
+      { path: '/Users/test/app', count: 2 },
+      { path: '/Users/test/other', count: 1 },
+      { path: NO_FOLDER_FILTER, count: 1 },
+    ])
+  })
+
+  it('filters by folder before paginating and keeps every folder option', () => {
+    const result = buildChatListResponse(chats, {
+      page: 1,
+      folder: '/Users/test/project-11',
+    })
+
+    expect(result.totalItems).toBe(1)
+    expect(result.items.map((c) => c.id)).toEqual(['grok:11'])
+    expect(result.folders).toHaveLength(25)
+  })
+
+  it('returns the no-folder bucket when filtering chats without a cwd', () => {
+    const perFolder: ChatSession[] = [
+      { ...chats[0], id: 'grok:1', cwd: '/Users/test/app' },
+      { ...chats[1], id: 'grok:2', cwd: undefined },
+    ]
+
+    const result = buildChatListResponse(perFolder, {
+      page: 1,
+      folder: NO_FOLDER_FILTER,
+    })
+
+    expect(result.totalItems).toBe(1)
+    expect(result.items.map((c) => c.id)).toEqual(['grok:2'])
   })
 })

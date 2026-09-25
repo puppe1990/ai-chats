@@ -1,5 +1,11 @@
 use serde::{Deserialize, Serialize};
 
+/// Sentinel for the "chats without a cwd" folder bucket — never a real folder path.
+pub const NO_FOLDER_FILTER: &str = "__no_folder__";
+
+/// Sentinel meaning "do not filter by folder".
+pub const ALL_FOLDERS: &str = "all";
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ChatSource {
@@ -63,6 +69,9 @@ pub struct ChatListQuery {
     pub page_size: Option<u32>,
     #[serde(default)]
     pub source: Option<String>,
+    /// Exact cwd to keep, or NO_FOLDER_FILTER for chats without one.
+    #[serde(default)]
+    pub folder: Option<String>,
     #[serde(default)]
     pub query: Option<String>,
     #[serde(default)]
@@ -86,8 +95,17 @@ pub struct ChatListResponse {
     pub has_previous_page: bool,
     pub has_next_page: bool,
     pub counts: SourceCounts,
+    pub folders: Vec<FolderCount>,
     pub total_chats: u32,
     pub favorite_count: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FolderCount {
+    /// Absolute working directory, or NO_FOLDER_FILTER for chats without one.
+    pub path: String,
+    pub count: u32,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

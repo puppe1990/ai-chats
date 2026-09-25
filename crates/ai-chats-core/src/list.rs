@@ -1,4 +1,7 @@
-use crate::types::{ChatListQuery, ChatListResponse, ChatSession, ChatSource, SourceCounts};
+use crate::types::{
+    ChatListQuery, ChatListResponse, ChatSession, ChatSource, FolderCount, SourceCounts,
+    ALL_FOLDERS, NO_FOLDER_FILTER,
+};
 use std::collections::{HashMap, HashSet};
 
 pub const CHAT_PAGE_SIZE: u32 = 10;
@@ -9,6 +12,7 @@ pub struct NormalizedChatListQuery {
     pub page: u32,
     pub page_size: u32,
     pub source: String,
+    pub folder: String,
     pub query: String,
     pub order: Vec<String>,
     pub favorite_ids: Vec<String>,
@@ -73,6 +77,13 @@ pub fn normalize_chat_list_query(input: &ChatListQuery) -> NormalizedChatListQue
         .filter(|s| !s.is_empty())
         .unwrap_or("all")
         .to_string();
+    let folder = input
+        .folder
+        .as_deref()
+        .map(str::trim)
+        .filter(|f| !f.is_empty())
+        .unwrap_or(ALL_FOLDERS)
+        .to_string();
     let query = input.query.clone().unwrap_or_default();
     let order = input.order.clone().unwrap_or_default();
     let favorite_ids = input
@@ -88,6 +99,7 @@ pub fn normalize_chat_list_query(input: &ChatListQuery) -> NormalizedChatListQue
         page: page.max(1),
         page_size,
         source,
+        folder,
         query,
         order,
         favorite_ids,
@@ -95,23 +107,41 @@ pub fn normalize_chat_list_query(input: &ChatListQuery) -> NormalizedChatListQue
     }
 }
 
-pub fn filter_chats(
-    chats: &[ChatSession],
-    source: &str,
-    query: &str,
-    favorite_ids: &[String],
-    favorites_only: bool,
-) -> Vec<ChatSession> {
-    let normalized_query = query.trim().to_lowercase();
-    let favorite_set: Option<HashSet<&str>> = if favorites_only {
-        Some(favorite_ids.iter().map(|s| s.as_str()).collect())
+/// Folder bucket a chat belongs to: its cwd, or NO_FOLDER_FILTER when missing.
+pub fn chat_folder_bucket(chat: &ChatSession) -> &str {
+    chat.cwd
+        .as_deref()
+        .map(str::trim)
+        .filter(|cwd| !cwd.is_empty())
+        .unwrap_or(NO_FOLDER_FILTER)
+}
+
+/// Filter spec for `filter_chats` — mirrors the TS `ChatFilterOptions`.
+#[derive(Debug, Clone, Copy)]
+pub struct ChatFilters<'a> {
+    pub source: &'a str,
+    pub folder: &'a str,
+    pub query: &'a str,
+    pub favorite_ids: &'a [String],
+    pub favorites_only: bool,
+}
+
+pub fn filter_chats(chats: &[ChatSession], filters: &ChatFilters<'_>) -> Vec<ChatSession> {
+    let normalized_query = filters.query.trim().to_lowercase();
+    let favorite_set: Option<HashSet<&str>> = if filters.favorites_only {
+        Some(filters.favorite_ids.iter().map(|s| s.as_str()).collect())
     } else {
         None
     };
-    let source_filter = if source == "all" || source.is_empty() {
+    let source_filter = if filters.source == "all" || filters.source.is_empty() {
         None
     } else {
-        parse_source_filter(source)
+        parse_source_filter(filters.source)
+    };
+    let folder_filter = if filters.folder == ALL_FOLDERS || filters.folder.is_empty() {
+        None
+    } else {
+        Some(filters.folder)
     };
 
     chats
@@ -125,6 +155,12 @@ pub fn filter_chats(
 
             if let Some(ref set) = favorite_set {
                 if !set.contains(chat.id.as_str()) {
+                    return false;
+                }
+            }
+
+            if let Some(folder) = folder_filter {
+                if chat_folder_bucket(chat) != folder {
                     return false;
                 }
             }
@@ -147,6 +183,24 @@ pub fn filter_chats(
         })
         .cloned()
         .collect()
+}
+
+/// Folder buckets with counts, most populated first. Counts ignore active filters.
+pub fn count_folders(chats: &[ChatSession]) -> Vec<FolderCount> {
+    let mut counts: HashMap<&str, u32> = HashMap::new();
+    for chat in chats {
+        *counts.entry(chat_folder_bucket(chat)).or_default() += 1;
+    }
+
+    let mut folders: Vec<FolderCount> = counts
+        .into_iter()
+        .map(|(path, count)| FolderCount {
+            path: path.to_string(),
+            count,
+        })
+        .collect();
+    folders.sort_by(|a, b| b.count.cmp(&a.count).then_with(|| a.path.cmp(&b.path)));
+    folders
 }
 
 #[derive(Debug, Clone)]
@@ -279,10 +333,13 @@ pub fn build_chat_list_response(
     let merged_order = merge_chat_order(&query.order, &chats);
     let filtered = filter_chats(
         &chats,
-        &query.source,
-        &query.query,
-        &query.favorite_ids,
-        query.favorites_only,
+        &ChatFilters {
+            source: &query.source,
+            folder: &query.folder,
+            query: &query.query,
+            favorite_ids: &query.favorite_ids,
+            favorites_only: query.favorites_only,
+        },
     );
     let ordered = sort_chats_by_custom_order(filtered, &merged_order);
     let pagination = paginate(&ordered, query.page, query.page_size);
@@ -298,6 +355,7 @@ pub fn build_chat_list_response(
         has_previous_page: pagination.has_previous_page,
         has_next_page: pagination.has_next_page,
         counts,
+        folders: count_folders(&chats),
         total_chats,
         favorite_count,
     }

@@ -1,9 +1,10 @@
 /** @vitest-environment jsdom */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { buildChatListResponse } from '../lib/chat-list'
 import type { ChatSession } from '../lib/types'
+import { ALL_FOLDERS } from '../lib/types'
 import { ChatList } from './ChatList'
 
 const mockFetchChats = vi.fn()
@@ -81,6 +82,7 @@ describe('ChatList', () => {
         buildChatListResponse(chats, {
           page: Number(data.page ?? 1),
           source: (data.source as 'all') ?? 'all',
+          folder: typeof data.folder === 'string' ? data.folder : ALL_FOLDERS,
           query: String(data.query ?? ''),
           order: Array.isArray(data.order) ? (data.order as string[]) : [],
           favoriteIds: Array.isArray(data.favoriteIds)
@@ -140,6 +142,40 @@ describe('ChatList', () => {
       expect(screen.getByText('Build chat aggregator')).toBeInTheDocument()
       expect(screen.queryByText('Limpar HD com script')).not.toBeInTheDocument()
       expect(screen.getByText(/1 resultado/)).toBeInTheDocument()
+    })
+  })
+
+  it('lists one folder option per cwd', () => {
+    render(<ChatList initialData={initialData()} />)
+
+    const select = screen.getByLabelText('Pasta')
+    expect((select as HTMLSelectElement).value).toBe(ALL_FOLDERS)
+    expect(
+      within(select)
+        .getAllByRole('option')
+        .map((option) => option.textContent),
+    ).toEqual(['Todas as pastas (3)', 'claude-project (1)', 'other (1)', 'project (1)'])
+  })
+
+  it('filters chats by folder via backend', async () => {
+    render(<ChatList initialData={initialData()} />)
+
+    fireEvent.change(screen.getByLabelText('Pasta'), {
+      target: { value: '/Users/test/other' },
+    })
+
+    await waitFor(() => {
+      expect(mockFetchChats).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ folder: '/Users/test/other' }),
+        }),
+      )
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Limpar HD com script')).toBeInTheDocument()
+      expect(screen.queryByText('Build chat aggregator')).not.toBeInTheDocument()
+      expect(screen.getByText(/1 resultado em other/)).toBeInTheDocument()
     })
   })
 

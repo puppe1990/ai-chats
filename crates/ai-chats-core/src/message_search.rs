@@ -82,6 +82,10 @@ fn leftover_unscanned(scanned: u32, total: usize) -> bool {
     scanned < total as u32
 }
 
+fn past_deadline(deadline: Instant) -> bool {
+    Instant::now() >= deadline
+}
+
 fn collect_hits_for_chat(
     chat: &ChatSession,
     messages: Vec<ChatMessage>,
@@ -116,12 +120,15 @@ where
     let mut scanned = 0u32;
     let cap = max_chats.min(chats.len() as u32);
     for chat in chats.iter().take(cap as usize) {
-        if Instant::now() >= deadline {
+        if past_deadline(deadline) {
             return (hits, scanned, true);
         }
         scanned += 1;
-        let filled = collect_hits_for_chat(chat, load_messages(chat), needle, &mut hits, max_hits);
-        if filled {
+        let messages = load_messages(chat);
+        if past_deadline(deadline) {
+            return (hits, scanned, true);
+        }
+        if collect_hits_for_chat(chat, messages, needle, &mut hits, max_hits) {
             return (hits, scanned, leftover_unscanned(scanned, chats.len()));
         }
     }

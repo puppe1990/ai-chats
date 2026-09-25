@@ -181,3 +181,69 @@ fn no_match_returns_empty_hits() {
     .expect("search");
     assert!(result.hits.is_empty());
 }
+
+#[test]
+fn expired_deadline_skips_load_and_truncates() {
+    let chats = vec![session("claude:1", ChatSource::Claude)];
+    let (hits, scanned, truncated) =
+        scan_chat_messages(&chats, "hit", 40, 10, Instant::now(), |_| {
+            panic!("must not load chats after deadline")
+        });
+    assert!(hits.is_empty());
+    assert_eq!(scanned, 0);
+    assert!(truncated);
+}
+
+#[test]
+fn invalid_source_is_an_error_with_received_value() {
+    let err = search_chat_messages(
+        MessageSearchQuery {
+            query: "TanStack".into(),
+            source: Some("windsurf".into()),
+            ..Default::default()
+        },
+        &fixture_paths(),
+    )
+    .unwrap_err();
+    match err {
+        MessageSearchError::InvalidSource { received } => assert_eq!(received, "windsurf"),
+        other => panic!("unexpected {other:?}"),
+    }
+}
+
+#[test]
+fn finds_grok_fixture_message() {
+    let result = search_chat_messages(
+        MessageSearchQuery {
+            query: "Olá Grok".into(),
+            ..Default::default()
+        },
+        &fixture_paths(),
+    )
+    .expect("search");
+    assert_eq!(result.hits.len(), 1);
+    assert!(
+        result.hits[0].chat_id.starts_with("grok:"),
+        "chat_id={}",
+        result.hits[0].chat_id
+    );
+}
+
+#[test]
+fn deadline_after_load_skips_hits_and_truncates() {
+    let chats = vec![session("claude:1", ChatSource::Claude)];
+    let (hits, scanned, truncated) = scan_chat_messages(
+        &chats,
+        "hit",
+        40,
+        10,
+        Instant::now() + Duration::from_millis(30),
+        |_| {
+            std::thread::sleep(Duration::from_millis(80));
+            vec![msg("a", "hit one")]
+        },
+    );
+    assert!(hits.is_empty(), "overrun load must not contribute hits");
+    assert_eq!(scanned, 1);
+    assert!(truncated);
+}

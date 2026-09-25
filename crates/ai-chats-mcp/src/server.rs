@@ -4,7 +4,7 @@ use crate::handlers::{
 };
 use ai_chats_core::DataPaths;
 use rmcp::handler::server::wrapper::Parameters;
-use rmcp::model::{CallToolResult, ContentBlock, ServerCapabilities, ServerConfig};
+use rmcp::model::{CallToolResult, ContentBlock, Implementation, ServerCapabilities, ServerConfig};
 use rmcp::{tool, tool_handler, tool_router, ServerHandler};
 
 const INSTRUCTIONS: &str = "Find coding-agent chats on this machine (Cursor, Grok, Codex, OpenCode, Claude Code, Command Code). Call search_chats first (title, working directory, source, model). If that misses, call list_recent_chats. Call search_chat_messages only when the topic is likely inside message bodies and the first two tools failed. Then call get_chat with a chatId from those results.";
@@ -92,6 +92,36 @@ impl AiChatsMcp {
 impl ServerHandler for AiChatsMcp {
     fn get_info(&self) -> ServerConfig {
         ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
+            .with_server_info(Implementation::new("ai-chats", env!("CARGO_PKG_VERSION")))
             .with_instructions(INSTRUCTIONS)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_info_advertises_ai_chats_name() {
+        let info = AiChatsMcp::from_env().get_info();
+        assert_eq!(info.server_info.name, "ai-chats");
+        assert_eq!(info.server_info.version, env!("CARGO_PKG_VERSION"));
+    }
+
+    #[test]
+    fn tool_router_lists_search_tools() {
+        let names: Vec<String> = AiChatsMcp::tool_router()
+            .list_all()
+            .into_iter()
+            .map(|tool| tool.name.into_owned())
+            .collect();
+        for expected in [
+            "search_chats",
+            "list_recent_chats",
+            "search_chat_messages",
+            "get_chat",
+        ] {
+            assert!(names.contains(&expected.to_string()), "missing {expected}");
+        }
     }
 }

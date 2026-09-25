@@ -1,6 +1,3 @@
-// Tool handlers are wired to MCP stdio in a later task.
-#![allow(dead_code)]
-
 use crate::compact::{
     clamp_limit, compact_list, compact_recent, paginate_detail, DEFAULT_GET_CHAT_LIMIT,
     DEFAULT_RECENT_LIMIT, DEFAULT_SEARCH_PAGE_SIZE, MAX_GET_CHAT_LIMIT, MAX_PAGE_SIZE,
@@ -10,10 +7,11 @@ use ai_chats_core::{
     get_chat_detail, get_chats, parse_source_arg, search_chat_messages, ChatListQuery, DataPaths,
     MessageSearchQuery,
 };
+use rmcp::schemars::{self, JsonSchema};
 use serde::Deserialize;
 use serde_json::Value;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 pub struct SearchChatsParams {
     #[serde(default)]
     pub query: Option<String>,
@@ -25,7 +23,7 @@ pub struct SearchChatsParams {
     pub page_size: Option<u32>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 pub struct ListRecentParams {
     #[serde(default)]
     pub source: Option<String>,
@@ -33,7 +31,7 @@ pub struct ListRecentParams {
     pub limit: Option<u32>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 pub struct SearchMessagesParams {
     pub query: String,
     #[serde(default)]
@@ -44,7 +42,7 @@ pub struct SearchMessagesParams {
     pub max_hits: Option<u32>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 pub struct GetChatParams {
     pub chat_id: String,
     #[serde(default)]

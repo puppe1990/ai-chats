@@ -1,5 +1,5 @@
 import { LayoutGrid, List } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   CHAT_DRAG_MIME,
@@ -22,6 +22,7 @@ import { getChats } from '../lib/desktop-api'
 import type { ChatSource } from '../lib/types'
 import { ALL_FOLDERS, NO_FOLDER_FILTER, SOURCE_LABELS } from '../lib/types'
 import { ChatItem } from './ChatItem'
+import { FolderFilterSelect } from './FolderFilterSelect'
 import { LoadingSpinner } from './LoadingSpinner'
 import { Pagination } from './Pagination'
 
@@ -156,10 +157,30 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
     [data.folders],
   )
 
-  function folderLabel(path: string) {
-    if (path === NO_FOLDER_FILTER) return t('chatList.noFolder')
-    return folderLabels.get(path) ?? path
-  }
+  const folderLabel = useCallback(
+    (path: string) => {
+      if (path === NO_FOLDER_FILTER) return t('chatList.noFolder')
+      return folderLabels.get(path) ?? path
+    },
+    [folderLabels, t],
+  )
+
+  const folderOptions = useMemo(
+    () => [
+      {
+        value: ALL_FOLDERS,
+        label: t('chatList.allFolders', { count: data.totalChats }),
+      },
+      ...data.folders.map((entry) => ({
+        value: entry.path,
+        label: t('chatList.folderOption', {
+          label: folderLabel(entry.path),
+          count: entry.count,
+        }),
+      })),
+    ],
+    [data.folders, data.totalChats, folderLabel, t],
+  )
 
   function commitReorder(draggedId: string, targetId: string) {
     const baseOrder = mergeChatOrder(chatOrder, data.items)
@@ -245,27 +266,17 @@ export function ChatList({ initialData }: { initialData: ChatListResponse }) {
           >
             {t('chatList.folder')}
           </label>
-          <select
-            id="chat-folder-filter"
+          <FolderFilterSelect
+            inputId="chat-folder-filter"
             value={folder}
-            onChange={(event) => {
-              setFolder(event.target.value)
+            options={folderOptions}
+            placeholder={t('chatList.folderPlaceholder')}
+            noOptionsMessage={t('chatList.folderNoOptions')}
+            onChange={(nextFolder) => {
+              setFolder(nextFolder)
               setPage(1)
             }}
-            className="max-w-full rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-900 shadow-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:border-zinc-400 dark:focus:ring-zinc-500"
-          >
-            <option value={ALL_FOLDERS}>
-              {t('chatList.allFolders', { count: data.totalChats })}
-            </option>
-            {data.folders.map((entry) => (
-              <option key={entry.path} value={entry.path} title={entry.path}>
-                {t('chatList.folderOption', {
-                  label: folderLabel(entry.path),
-                  count: entry.count,
-                })}
-              </option>
-            ))}
-          </select>
+          />
         </div>
       )}
 

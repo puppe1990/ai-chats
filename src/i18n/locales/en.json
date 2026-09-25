@@ -76,6 +76,8 @@
     "allFolders": "All folders ({{count}})",
     "noFolder": "No folder",
     "folderOption": "{{label}} ({{count}})",
+    "folderPlaceholder": "Select folder",
+    "folderNoOptions": "No folder found",
     "all": "All ({{count}})",
     "favorites": "Favorites ({{count}})",
     "sourceCount": "{{label}} ({{count}})",

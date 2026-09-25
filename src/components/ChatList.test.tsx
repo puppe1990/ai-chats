@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { buildChatListResponse } from '../lib/chat-list'
 import type { ChatSession } from '../lib/types'
@@ -148,21 +148,23 @@ describe('ChatList', () => {
   it('lists one folder option per cwd', () => {
     render(<ChatList initialData={initialData()} />)
 
-    const select = screen.getByLabelText('Pasta')
-    expect((select as HTMLSelectElement).value).toBe(ALL_FOLDERS)
-    expect(
-      within(select)
-        .getAllByRole('option')
-        .map((option) => option.textContent),
-    ).toEqual(['Todas as pastas (3)', 'claude-project (1)', 'other (1)', 'project (1)'])
+    expect(screen.getByText('Todas as pastas (3)')).toBeInTheDocument()
+
+    fireEvent.mouseDown(screen.getByLabelText('Pasta'))
+
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+      'Todas as pastas (3)',
+      'claude-project (1)',
+      'other (1)',
+      'project (1)',
+    ])
   })
 
   it('filters chats by folder via backend', async () => {
     render(<ChatList initialData={initialData()} />)
 
-    fireEvent.change(screen.getByLabelText('Pasta'), {
-      target: { value: '/Users/test/other' },
-    })
+    fireEvent.mouseDown(screen.getByLabelText('Pasta'))
+    fireEvent.click(screen.getByRole('option', { name: 'other (1)' }))
 
     await waitFor(() => {
       expect(mockFetchChats).toHaveBeenCalledWith(

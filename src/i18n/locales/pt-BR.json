@@ -76,6 +76,8 @@
     "allFolders": "Todas as pastas ({{count}})",
     "noFolder": "Sem pasta",
     "folderOption": "{{label}} ({{count}})",
+    "folderPlaceholder": "Selecionar pasta",
+    "folderNoOptions": "Nenhuma pasta encontrada",
     "all": "Todos ({{count}})",
     "favorites": "Favoritos ({{count}})",
     "sourceCount": "{{label}} ({{count}})",

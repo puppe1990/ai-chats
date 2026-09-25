@@ -6,6 +6,8 @@ Dense rules for coding agents. Keep every line short and imperative.
 
 - Tests (TS): `npm test`
 - Tests (Rust core): `cargo test -p ai-chats-core`
+- Tests (Rust MCP): `cargo test -p ai-chats-mcp`
+- MCP server: `cargo run -q -p ai-chats-mcp` (stdio; logs on stderr)
 - Lint: `npm run lint`
 - Format: `npm run format` / `cargo fmt`
 - Routes: `npm run generate-routes` after adding/renaming `src/routes/*`
@@ -40,6 +42,7 @@ Dense rules for coding agents. Keep every line short and imperative.
 
 ```
 crates/ai-chats-core/   # Rust: chats + skills I/O (desktop data layer)
+crates/ai-chats-mcp/    # stdio MCP for searching chats
 src-tauri/              # Tauri commands → core
 src/lib/                # pure TS helpers + desktop-api invoke wrappers
 src/components/         # UI units (+ *.test.tsx)

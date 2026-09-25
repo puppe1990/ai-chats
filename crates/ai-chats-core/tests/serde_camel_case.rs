@@ -1,4 +1,6 @@
-use ai_chats_core::{ChatMessage, ChatMessageRole, ChatSession, ChatSource};
+use ai_chats_core::{
+    ChatMessage, ChatMessageRole, ChatSession, ChatSource, MessageSearchHit, MessageSearchResponse,
+};
 
 #[test]
 fn chat_session_serializes_camel_case() {
@@ -38,4 +40,33 @@ fn chat_message_role_lowercase() {
     };
     let v = serde_json::to_value(&m).unwrap();
     assert_eq!(v.get("role").and_then(|x| x.as_str()), Some("assistant"));
+}
+
+#[test]
+fn message_search_response_serializes_camel_case() {
+    let hit = MessageSearchHit {
+        chat_id: "claude:abc".into(),
+        title: "T".into(),
+        source: ChatSource::Claude,
+        updated_at: "2026-01-01T00:00:00.000Z".into(),
+        message_id: "m1".into(),
+        role: ChatMessageRole::User,
+        snippet: "hello".into(),
+    };
+    let response = MessageSearchResponse {
+        query: "hello".into(),
+        hits: vec![hit],
+        chats_scanned: 1,
+        truncated: false,
+    };
+    let v = serde_json::to_value(&response).unwrap();
+    assert!(v.get("chatsScanned").is_some());
+    assert!(v.get("chatId").is_none());
+    assert_eq!(
+        v.get("hits")
+            .and_then(|h| h.get(0))
+            .and_then(|h| h.get("chatId"))
+            .and_then(|x| x.as_str()),
+        Some("claude:abc")
+    );
 }

@@ -37,7 +37,7 @@ pub fn source_key(source: ChatSource) -> &'static str {
     }
 }
 
-fn parse_source_filter(source: &str) -> Option<ChatSource> {
+pub fn parse_source_filter(source: &str) -> Option<ChatSource> {
     match source {
         "cursor" => Some(ChatSource::Cursor),
         "grok" => Some(ChatSource::Grok),
@@ -47,6 +47,18 @@ fn parse_source_filter(source: &str) -> Option<ChatSource> {
         "commandcode" => Some(ChatSource::CommandCode),
         _ => None,
     }
+}
+
+pub const SOURCE_KEYS: &str = "cursor, grok, codex, opencode, claude, commandcode";
+
+pub fn parse_source_arg(source: Option<&str>) -> Result<Option<ChatSource>, String> {
+    let raw = source.map(str::trim).unwrap_or("");
+    if raw.is_empty() || raw.eq_ignore_ascii_case("all") {
+        return Ok(None);
+    }
+    parse_source_filter(raw)
+        .map(Some)
+        .ok_or_else(|| format!("invalid source: received {raw:?}, expected one of {SOURCE_KEYS}"))
 }
 
 pub fn normalize_chat_list_query(input: &ChatListQuery) -> NormalizedChatListQuery {

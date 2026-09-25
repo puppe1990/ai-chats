@@ -147,6 +147,25 @@ UI (TanStack Router / Tauri webview SPA)
 - Unit tests: Vitest for UI/pure TS; Rust tests for providers under `crates/ai-chats-core`
 - Tauri (`src-tauri/`) is the native shell + command bridge; **no Node process at runtime**
 
+## MCP server
+
+Local stdio MCP so Grok, Cursor, or Claude can search the same chats as this app.
+
+Tools, in order: `search_chats` (title / cwd / source / model) → `list_recent_chats` → `search_chat_messages` (message bodies, last resort) → `get_chat`.
+
+```bash
+cargo build -p ai-chats-mcp --release
+grok mcp add ai-chats -- "$PWD/target/release/ai-chats-mcp"
+```
+
+Dev from this clone:
+
+```bash
+cargo run -q -p ai-chats-mcp
+```
+
+Same path env vars as the app (`GROK_HOME`, `CLAUDE_HOME`, …). Chat data stays read-only. This does not write your user `~/.grok/config.toml` for you.
+
 ## Project structure
 
 ```
@@ -173,4 +192,5 @@ GitHub Actions runs on every push and PR:
 - ESLint
 - Vitest
 - `cargo test -p ai-chats-core` (Rust data layer)
+- `cargo test -p ai-chats-mcp` (Rust MCP server)
 - Production frontend build

@@ -34,6 +34,7 @@ jobs:
           workspaces: |
             .
             crates/ai-chats-core
+            crates/ai-chats-mcp
 
       # better-sqlite3 native addon
       - name: Install build tools
@@ -55,6 +56,9 @@ jobs:
 
       - name: Tests (Rust ai-chats-core)
         run: cargo test -p ai-chats-core
+
+      - name: Tests (Rust ai-chats-mcp)
+        run: cargo test -p ai-chats-mcp
 
       - name: Build
         run: npm run build

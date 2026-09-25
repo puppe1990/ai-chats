@@ -1,5 +1,6 @@
 pub mod aggregate;
 pub mod list;
+pub mod message_search;
 pub mod messages;
 pub mod paths;
 pub mod providers;
@@ -9,7 +10,13 @@ pub mod text;
 pub mod types;
 
 pub use aggregate::{aggregate_chats, PROVIDER_TIMEOUT_MS};
-pub use list::{build_chat_list_response, CHAT_PAGE_SIZE};
+pub use list::{
+    build_chat_list_response, parse_source_arg, parse_source_filter, CHAT_PAGE_SIZE, SOURCE_KEYS,
+};
+pub use message_search::{
+    scan_chat_messages, search_chat_messages, snippet_around, MessageSearchError,
+    DEFAULT_MAX_CHATS, DEFAULT_MAX_HITS, MESSAGE_SEARCH_TIMEOUT_MS,
+};
 pub use paths::DataPaths;
 pub use skills::{
     delete_skill, encode_skill_id, get_skill, list_skills, save_skill, SkillDetail, SkillPaths,

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { filterChats } from './filter-chats'
+import { chatFolderBucket, filterChats } from './filter-chats'
 import type { ChatSession } from './types'
+import { ALL_FOLDERS, NO_FOLDER_FILTER } from './types'
 
 const sample: ChatSession[] = [
   {
@@ -79,5 +80,47 @@ describe('filterChats', () => {
     })
     expect(onlyFav).toHaveLength(1)
     expect(onlyFav[0].id).toBe('codex:2')
+  })
+
+  it('filters by exact folder path', () => {
+    const inOther = filterChats(sample, { folder: '/Users/test/other' })
+
+    expect(inOther).toHaveLength(1)
+    expect(inOther[0].id).toBe('codex:2')
+    expect(filterChats(sample, { folder: '/Users/test' })).toHaveLength(0)
+  })
+
+  it('keeps every folder when folder is all or unset', () => {
+    expect(filterChats(sample, { folder: ALL_FOLDERS })).toHaveLength(3)
+    expect(filterChats(sample, {})).toHaveLength(3)
+  })
+
+  it('buckets chats without a cwd under the no-folder filter', () => {
+    const withoutCwd: ChatSession[] = [
+      ...sample,
+      {
+        id: 'cursor:9',
+        source: 'cursor',
+        title: 'Sem diretório',
+        createdAt: '2026-06-25T10:00:00Z',
+        updatedAt: '2026-06-25T10:00:00Z',
+      },
+    ]
+
+    expect(chatFolderBucket(withoutCwd[3])).toBe(NO_FOLDER_FILTER)
+    const noFolder = filterChats(withoutCwd, { folder: NO_FOLDER_FILTER })
+
+    expect(noFolder).toHaveLength(1)
+    expect(noFolder[0].id).toBe('cursor:9')
+    expect(filterChats(withoutCwd, { folder: '/Users/test/other' })).toHaveLength(1)
+  })
+
+  it('combines folder and query filters', () => {
+    expect(
+      filterChats(sample, { folder: '/Users/test/project', query: 'limpar' }),
+    ).toHaveLength(0)
+    expect(
+      filterChats(sample, { folder: '/Users/test/project', query: 'aggregator' }),
+    ).toHaveLength(1)
   })
 })

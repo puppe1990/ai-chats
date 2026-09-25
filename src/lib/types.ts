@@ -19,6 +19,18 @@ export interface ChatSession {
   storagePath?: string
 }
 
+/** Sentinel for the "chats without a cwd" folder bucket — never a real folder path. */
+export const NO_FOLDER_FILTER = '__no_folder__'
+
+/** Sentinel meaning "do not filter by folder". */
+export const ALL_FOLDERS = 'all'
+
+export interface FolderCount {
+  /** Absolute working directory, or NO_FOLDER_FILTER for chats without one. */
+  path: string
+  count: number
+}
+
 export type ChatMessageRole = 'user' | 'assistant' | 'system' | 'tool'
 
 export interface ChatMessage {

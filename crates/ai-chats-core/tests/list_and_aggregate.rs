@@ -1,6 +1,6 @@
 use ai_chats_core::{
     aggregate_chats, build_chat_list_response, ChatListQuery, ChatSession, ChatSource, DataPaths,
-    CHAT_PAGE_SIZE,
+    FolderCount, CHAT_PAGE_SIZE, NO_FOLDER_FILTER,
 };
 use std::path::PathBuf;
 
@@ -13,6 +13,20 @@ fn make_chat(id: &str, source: ChatSource, title: &str, updated_at: &str) -> Cha
         created_at: "2026-06-24T10:00:00Z".into(),
         updated_at: updated_at.to_string(),
         message_count: Some(1),
+        model: None,
+        storage_path: None,
+    }
+}
+
+fn chat_with_cwd(id: &str, cwd: Option<&str>, updated_at: &str) -> ChatSession {
+    ChatSession {
+        id: id.to_string(),
+        source: ChatSource::Grok,
+        title: format!("Chat {id}"),
+        cwd: cwd.map(str::to_string),
+        created_at: "2026-06-24T10:00:00Z".into(),
+        updated_at: updated_at.to_string(),
+        message_count: None,
         model: None,
         storage_path: None,
     }
@@ -169,6 +183,75 @@ fn filters_by_source_and_paginates() {
     assert_eq!(result.counts.grok, 2);
     assert_eq!(result.counts.codex, 1);
     assert_eq!(result.total_chats, 3);
+}
+
+#[test]
+fn counts_folders_most_populated_first() {
+    let chats = vec![
+        chat_with_cwd("grok:1", Some("/Users/test/app"), "2026-06-24T12:00:00Z"),
+        chat_with_cwd("grok:2", Some("/Users/test/app"), "2026-06-24T11:00:00Z"),
+        chat_with_cwd("grok:3", Some("/Users/test/other"), "2026-06-24T10:00:00Z"),
+        chat_with_cwd("grok:4", None, "2026-06-24T09:00:00Z"),
+    ];
+
+    let result = build_chat_list_response(
+        chats,
+        ChatListQuery {
+            page: 1,
+            ..Default::default()
+        },
+    );
+
+    assert_eq!(
+        result.folders,
+        vec![
+            FolderCount {
+                path: "/Users/test/app".into(),
+                count: 2,
+            },
+            FolderCount {
+                path: "/Users/test/other".into(),
+                count: 1,
+            },
+            FolderCount {
+                path: NO_FOLDER_FILTER.into(),
+                count: 1,
+            },
+        ]
+    );
+}
+
+#[test]
+fn filters_by_folder_before_paginating() {
+    let chats = vec![
+        chat_with_cwd("grok:1", Some("/Users/test/app"), "2026-06-24T12:00:00Z"),
+        chat_with_cwd("grok:2", Some("/Users/test/other"), "2026-06-24T11:00:00Z"),
+        chat_with_cwd("grok:3", None, "2026-06-24T10:00:00Z"),
+    ];
+
+    let in_other = build_chat_list_response(
+        chats.clone(),
+        ChatListQuery {
+            page: 1,
+            folder: Some("/Users/test/other".into()),
+            ..Default::default()
+        },
+    );
+    assert_eq!(in_other.total_items, 1);
+    assert_eq!(in_other.items[0].id, "grok:2");
+    // Counts ignore the active filter, so the dropdown keeps every folder option.
+    assert_eq!(in_other.folders.len(), 3);
+
+    let without_cwd = build_chat_list_response(
+        chats,
+        ChatListQuery {
+            page: 1,
+            folder: Some(NO_FOLDER_FILTER.into()),
+            ..Default::default()
+        },
+    );
+    assert_eq!(without_cwd.total_items, 1);
+    assert_eq!(without_cwd.items[0].id, "grok:3");
 }
 
 fn fixture_paths() -> DataPaths {

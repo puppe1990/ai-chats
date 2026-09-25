@@ -100,3 +100,36 @@ pub struct SourceCounts {
     pub claude: u32,
     pub commandcode: u32,
 }
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MessageSearchQuery {
+    pub query: String,
+    #[serde(default)]
+    pub source: Option<String>,
+    #[serde(default)]
+    pub max_chats: Option<u32>,
+    #[serde(default)]
+    pub max_hits: Option<u32>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MessageSearchHit {
+    pub chat_id: String,
+    pub title: String,
+    pub source: ChatSource,
+    pub updated_at: String,
+    pub message_id: String,
+    pub role: ChatMessageRole,
+    pub snippet: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MessageSearchResponse {
+    pub query: String,
+    pub hits: Vec<MessageSearchHit>,
+    pub chats_scanned: u32,
+    pub truncated: bool,
+}
